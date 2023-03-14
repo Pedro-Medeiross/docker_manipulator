@@ -9,11 +9,13 @@ monitored_pairs = []
 candles_streams = {}
 
 # ID do usuário
+print('Iniciando bot...')
 user_id = os.getenv('USER_ID')
 # Instância da API da IQ Option
 Iq = IqOption(user_id)
 # Conexão à API
 Iq.connect()
+print('Conectado à API')
 instance = Iq.instance()
 
 # Status do bot
@@ -41,6 +43,7 @@ def update_monitored_pairs():
 
 
 while status_bot == 1:
+    print('Verificando status do bot...')
     update_monitored_pairs()
     trade_info_values = repository.get_trade_info_and_values(user_id)
     trade_info = trade_info_values["trade_info"]
