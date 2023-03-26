@@ -1,11 +1,13 @@
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import docker
-import repository
+import api
 
 app = FastAPI()
 
-origins = ["*"]
+
+origins = ["http://localhost:3000", "http://127.0.0.1/3000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,12 +44,12 @@ async def start_bot(user_id: int):
          não foram encontradas, ou se o ‘cluster’ foi iniciado com sucesso.
     """
     # Verifica se o ‘cluster’ já está em execução.
-    status_bot = repository.status_bot(user_id)
+    status_bot = await api.get_status_bot(user_id)
     if status_bot == 1:
         return {'message': 'Bot already running'}
     # Obtém as credenciais do usuário.
-    email = repository.get_iqoption_credentials(user_id)[0][2]
-    password = repository.get_iqoption_credentials(user_id)[0][3]
+    email = await api.get_user_iqoption_email(user_id)
+    password = await api.get_user_iqoption_password(user_id)
     if email is None or password is None:
         return {'message': 'Credentials not found'}
     # Verifica se há algum contêiner existente para esse usuário.
@@ -59,11 +61,11 @@ async def start_bot(user_id: int):
         if container.name == f'bot_{user_id}':
             if container.status == 'running':
                 return {'message': 'Bot already running'}
-            repository.set_status_bot(user_id, 1)
+            await api.set_status_bot(user_id, 1)
             container.start()
             return {'message': 'Bot started'}
     # Cria um novo contêiner para esse usuário.
-    repository.set_status_bot(user_id, 1)
+    await api.set_status_bot(user_id, 1)
     client.containers.create(image='docker_bot:latest', name=f'bot_{user_id}', detach=True, environment=env_vars)
     client.containers.get(f'bot_{user_id}').start()
     return {'message': 'Bot created and started'}
@@ -81,14 +83,14 @@ async def stop_bot(user_id: int):
         dict: dicionário contendo uma mensagem informando se o bot já estava parado ou se o bot foi parado com sucesso.
     """
     # Verifica se o bot já está parado.
-    status_bot = repository.status_bot(user_id)
+    status_bot = await api.get_status_bot(user_id)
     if status_bot == 0:
         return {'message': 'Bot already stopped'}
     # Procura pelo contêiner do cluster e o para.
     containers = client.containers.list(all=True)
     for container in containers:
         if container.name == f'bot_{user_id}':
-            repository.set_status_bot(user_id, 0)
+            await api.set_status_bot(user_id, 0)
             container.stop()
             return {'message': 'Bot stopped'}
     return {'message': 'Bot not found'}

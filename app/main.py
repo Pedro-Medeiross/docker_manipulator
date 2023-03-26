@@ -79,4 +79,4 @@ while status_bot == 1:
 
         if pair not in monitored_pairs:
             break
-        time.sleep(1.5)
+        time.sleep(1.0)
