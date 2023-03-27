@@ -2,43 +2,6 @@ from datetime import date
 import mysqldb
 
 
-# Obtém as credenciais da IQ Option do usuário com o ID fornecido
-def get_iqoption_credentials(id):
-    conn = mysqldb.get_connection()  # obtém a conexão com o banco de dados
-    cursor = conn.cursor()  # cria um cursor para executar as consultas SQL
-    query = "SELECT * FROM users_userextension where user_id=%s"  # consulta SQL para selecionar as
-    # credenciais do usuário
-    cursor.execute(query, (id,))  # executa a consulta SQL, passando o ID do usuário como parâmetro
-    result = cursor.fetchall()  # obtém os resultados da consulta
-    cursor.close()  # fecha o cursor
-    conn.close()  # fecha a conexão com o banco de dados
-    return result  # retorna as credenciais da IQ Option do usuário com o ID fornecido
-
-
-# Obtém o status do bot da IQ Option para o usuário com o ID fornecido
-def status_bot(id):
-    conn = mysqldb.get_connection()  # obtém a conexão com o banco de dados
-    cursor = conn.cursor()  # cria um cursor para executar as consultas SQL
-    query = "SELECT status FROM iqoption_botoptions WHERE user_id = %s"  # consulta SQL para selecionar o status do bot
-    cursor.execute(query, (id,))  # executa a consulta SQL, passando o ID do usuário como parâmetro
-    result = cursor.fetchone()[0]  # obtém o resultado da consulta
-    cursor.close()  # fecha o cursor
-    conn.close()  # fecha a conexão com o banco de dados
-    return result  # retorna o status do bot da IQ Option para o usuário com o ID fornecido
-
-
-# Define o status do bot da IQ Option para o usuário com o ID fornecido
-def set_status_bot(id, status):
-    conn = mysqldb.get_connection()  # obtém a conexão com o banco de dados
-    cursor = conn.cursor()  # cria um cursor para executar as consultas SQL
-    query = "UPDATE iqoption_botoptions SET status = %s WHERE user_id = %s"  # consulta SQL para atualizar
-    # o status do bot
-    cursor.execute(query, (status, id))  # executa a consulta SQL, passando o status e o ID do usuário como parâmetros
-    cursor.close()  # fecha o cursor
-    conn.commit()  # confirma a transação no banco de dados
-    conn.close()  # fecha a conexão com o banco de dados
-
-
 def get_trade_info_and_values(id):
     # Estabelece conexão com o banco de dados
     conn = mysqldb.get_connection()

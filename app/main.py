@@ -1,6 +1,6 @@
 import os
 import time
-import repository
+import api
 from iqoption import IqOption
 
 # Pares que serão monitorados
@@ -19,7 +19,7 @@ print('Conectado à API')
 instance = Iq.instance()
 
 # Status do bot
-status_bot = repository.status_bot(user_id)
+status_bot = api.get_status_bot(user_id)
 
 # Status da negociação atual
 trade_status = None
@@ -75,7 +75,7 @@ while status_bot == 1:
                         print('Comprando', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
                         instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                   duration=time_frame)
-                        repository.set_schedule_status(trade_info_id, 1)
+                        api.set_schedule_status(trade_info_id, 1)
 
         if pair not in monitored_pairs:
             break
