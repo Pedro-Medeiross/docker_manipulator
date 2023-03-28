@@ -18,7 +18,7 @@ async def get_status_bot(user_id):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get(f'http://localhost:5000/api/status_bot/{user_id}', headers=headers) as response:
+        async with session.get(f'https://v1.investingbrazil.online/api/status_bot/{user_id}', headers=headers) as response:
             status = await response.json()
             r = status[0]['status']
             return r
@@ -40,7 +40,8 @@ async def get_user_iqoption_email(user_id: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get('http://localhost:3000/api/userextensions/', params=params, headers=headers) as response:
+        async with session.get('https://v1.investingbrazil.online/api/userextensions/', params=params,
+                               headers=headers) as response:
             r = await response.json()
             email = r[0]['iqoption_email']
             return email
@@ -59,10 +60,11 @@ async def get_user_iqoption_password(user_id: int):
     params = {
         'user_id': user_id
     }
-    async with aiohttp.ClientSession() as session:+
-    auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
-    headers = {'Authorization': auth.encode()}
-        async with session.get('http://localhost:3000/api/userextensions/', params=params, headers=headers) as response:
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get('https://v1.investingbrazil.online/api/userextensions/', params=params,
+                               headers=headers) as response:
             r = await response.json()
             password = r[0]['iqoption_password']
             return password
@@ -83,8 +85,95 @@ async def set_schedule_status(trade_info_id: int, status: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.put('http://localhost:3000/api/usertrades/', params=params, headers=headers) as response:
+        async with session.put('https://v1.investingbrazil.online/api/usertrades/', params=params,
+                               headers=headers) as response:
             return await response.json()
 
 
+async def get_trade_info_pairs():
+    """
+    Retorna as moedas que podem ser negociadas.
+    Returns:
+        list: lista de moedas que podem ser negociadas.
 
+    """
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get('https://v1.investingbrazil.online//api/tradeinfo/', headers=headers) as response:
+            r = await response.json()
+            pairs = []
+            for i in r:
+                if i['tipo_moeda'] not in pairs:
+                    pairs.append(i['tipo_moeda'])
+            return pairs
+
+
+async def get_trade_user_info_scheduled(user_id: int):
+    """
+    Retorna as informações de trade do usuário com o ID fornecido.
+
+    Args:
+        user_id (int): ID do usuário cujas informações de trade devem ser retornadas.
+
+    Returns:
+        list: lista de dicionários contendo as informações de trade do usuário.
+    """
+    params = {
+        'user_id': user_id
+    }
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get('https://v1.investingbrazil.online/api/tradeuserinfo/', params=params,
+                               headers=headers) as response:
+            r = await response.json()
+            trade_info_ids = []
+            for i in r:
+                if i['trade_info'] not in trade_info_ids:
+                    trade_info_ids.append(i['trade_info'])
+            return trade_info_ids
+
+
+async def get_trade_info(trade_info_id: int):
+    """
+    Retorna as informações de trade do usuário com o ID fornecido.
+
+    Args:
+        trade_info_id (int): ID do usuário cujas informações de trade devem ser retornadas.
+
+    Returns:
+        list: lista de dicionários contendo as informações de trade do usuário.
+    """
+    params = {
+        'id': trade_info_id
+    }
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get('https://v1.investingbrazil.online/api/tradeinfo/', params=params,
+                               headers=headers) as response:
+            r = await response.json()
+            return r
+
+
+async def get_user_values_by_trade_id(trade_info_id: int):
+    """
+    Retorna os valores do usuário com o ID fornecido.
+
+    Args:
+        trade_info_id (int): ID do usuário cujos valores devem ser retornados.
+
+    Returns:
+        list: lista de dicionários contendo os valores do usuário.
+    """
+    params = {
+        'trade_info_id': trade_info_id
+    }
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get('https://v1.investingbrazil.online/api/usertrades/', params=params,
+                               headers=headers) as response:
+            r = await response.json()
+            return r
