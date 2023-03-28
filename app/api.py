@@ -1,9 +1,24 @@
 import aiohttp
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 async def get_status_bot(user_id):
+    """
+        Retorna o status do bot do usuário com o ID fornecido.
+
+        Args:
+            user_id (int): O ID do usuário cujo status do bot deve ser retornado.
+
+        Returns:
+            dict: Um dicionário contendo o status do bot do usuário.
+        """
     async with aiohttp.ClientSession() as session:
-        async with session.get(f'http://localhost:5000/api/status_bot/{user_id}') as response:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get(f'http://localhost:5000/api/status_bot/{user_id}', headers=headers) as response:
             status = await response.json()
             r = status[0]['status']
             return r
@@ -23,7 +38,9 @@ async def get_user_iqoption_email(user_id: int):
         'user_id': user_id
     }
     async with aiohttp.ClientSession() as session:
-        async with session.get('http://localhost:3000/api/userextensions/', params=params) as response:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get('http://localhost:3000/api/userextensions/', params=params, headers=headers) as response:
             r = await response.json()
             email = r[0]['iqoption_email']
             return email
@@ -42,8 +59,10 @@ async def get_user_iqoption_password(user_id: int):
     params = {
         'user_id': user_id
     }
-    async with aiohttp.ClientSession() as session:
-        async with session.get('http://localhost:3000/api/userextensions/', params=params) as response:
+    async with aiohttp.ClientSession() as session:+
+    auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+    headers = {'Authorization': auth.encode()}
+        async with session.get('http://localhost:3000/api/userextensions/', params=params, headers=headers) as response:
             r = await response.json()
             password = r[0]['iqoption_password']
             return password
@@ -62,5 +81,10 @@ async def set_schedule_status(trade_info_id: int, status: int):
         'status': status
     }
     async with aiohttp.ClientSession() as session:
-        async with session.put('http://localhost:3000/api/usertrades/', params=params) as response:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.put('http://localhost:3000/api/usertrades/', params=params, headers=headers) as response:
             return await response.json()
+
+
+

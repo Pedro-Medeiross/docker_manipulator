@@ -1,4 +1,8 @@
 import aiohttp
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 async def get_status_bot(user_id: int):
@@ -15,7 +19,9 @@ async def get_status_bot(user_id: int):
         'user_id': user_id
     }
     async with aiohttp.ClientSession() as session:
-        async with session.get('http://localhost:3000/api/botoptions/', params=params) as response:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get('https://v1.investingbrazil.online/api/botoptions/', params=params, headers=headers) as response:
             r = await response.json()
             status = r[0]['status']
             return status
@@ -34,7 +40,9 @@ async def set_status_bot(user_id: int, status: int):
         'status': status
     }
     async with aiohttp.ClientSession() as session:
-        async with session.put('http://localhost:3000/api/botoptions/', params=params) as response:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.put('https://v1.investingbrazil.online/api/botoptions/', params=params, headers=headers) as response:
             pass
 
 async def get_user_iqoption_email(user_id: int):
@@ -51,7 +59,9 @@ async def get_user_iqoption_email(user_id: int):
         'user_id': user_id
     }
     async with aiohttp.ClientSession() as session:
-        async with session.get('http://localhost:3000/api/userextensions/', params=params) as response:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get('https://v1.investingbrazil.online/api/userextensions/', params=params, headers=headers) as response:
             r = await response.json()
             email = r[0]['iqoption_email']
             return email
@@ -71,7 +81,9 @@ async def get_user_iqoption_password(user_id: int):
         'user_id': user_id
     }
     async with aiohttp.ClientSession() as session:
-        async with session.get('http://localhost:3000/api/userextensions/', params=params) as response:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get('https://v1.investingbrazil.online/api/userextensions/', params=params, headers=headers) as response:
             r = await response.json()
             password = r[0]['iqoption_password']
             return password
