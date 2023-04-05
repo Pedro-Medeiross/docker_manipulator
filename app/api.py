@@ -38,7 +38,7 @@ async def set_schedule_status(trade_id: int, status: int, user_id: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.put(f'https://v1.investingbrazil.online/trade/associate/{trade_id}/{user_id}', data=data,
+        async with session.put(f'https://v1.investingbrazil.online/trade/associate/{trade_id}/{user_id}', json=data,
                                headers=headers) as response:
             return await response.json()
 
