@@ -56,7 +56,9 @@ async def start_bot(user_id: int):
     # Verifica se há algum contêiner existente para esse usuário.
     containers = client.containers.list(all=True)
     env_vars = {
-        'USER_ID': user_id
+        'USER_ID': user_id,
+        "EMAIL": email,
+        "PASSWORD": password
     }
     for container in containers:
         if container.name == f'bot_{user_id}':
