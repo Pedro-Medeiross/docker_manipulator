@@ -15,13 +15,10 @@ async def get_status_bot(user_id: int):
     Returns:
         dict: dicionário contendo o status do bot do usuário.
     """
-    params = {
-        'user_id': user_id
-    }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get('https://v1.investingbrazil.online/api/botoptions/', params=params, headers=headers) as response:
+        async with session.get(f'https://v1.investingbrazil.online/botoptions/{user_id}', headers=headers) as response:
             r = await response.json()
             status = r[0]['status']
             return status
@@ -36,14 +33,14 @@ async def set_status_bot(user_id: int, status: int):
         status (int): novo status do bot.
     """
     params = {
-        'user_id': user_id,
         'status': status
     }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.put('https://v1.investingbrazil.online/api/botoptions/', params=params, headers=headers) as response:
+        async with session.put(f'https://v1.investingbrazil.online/botoptions/{user_id}', data=params, headers=headers) as response:
             pass
+
 
 async def get_user_iqoption_email(user_id: int):
     """
@@ -55,15 +52,12 @@ async def get_user_iqoption_email(user_id: int):
     Returns:
         str: email do usuário.
     """
-    params = {
-        'user_id': user_id
-    }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get('https://v1.investingbrazil.online/api/userextensions/', params=params, headers=headers) as response:
+        async with session.get(f'https://v1.investingbrazil.online/user/{user_id}', headers=headers) as response:
             r = await response.json()
-            email = r[0]['iqoption_email']
+            email = r[0]['brokerage_email']
             return email
 
 
@@ -77,13 +71,10 @@ async def get_user_iqoption_password(user_id: int):
     Returns:
         str: senha do usuário.
     """
-    params = {
-        'user_id': user_id
-    }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get('https://v1.investingbrazil.online/api/userextensions/', params=params, headers=headers) as response:
+        async with session.get(f'https://v1.investingbrazil.online/user/{user_id}', headers=headers) as response:
             r = await response.json()
-            password = r[0]['iqoption_password']
+            password = r[0]['brokerage_password']
             return password
