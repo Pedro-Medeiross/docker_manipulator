@@ -36,7 +36,6 @@ action = None
 def update_monitored_pairs(user_id: int):
     # Obtém os pares de moedas disponíveis para negociação
     trade_info_pairs = asyncio.run(api.get_trade_info_pairs(user_id))
-    print(trade_info_pairs)
     # Adiciona os pares que ainda não estão sendo monitorados
     for par in trade_info_pairs:
         if par not in monitored_pairs:
@@ -52,7 +51,7 @@ while status_bot == 1:
         print('Verificando par: ', pair)
         if pair not in candles_streams:
             candles_streams[pair] = instance.start_candles_stream(pair, 1, 1)
-        candles = instance.get_realtime_candles(pair, 1)
+        candles = candles_streams[pair]
         candle = 0
         for key in list(candles.keys()):
             candle = candles[key]["open"]
@@ -74,4 +73,3 @@ while status_bot == 1:
 
         if pair not in monitored_pairs:
             break
-        time.sleep(1.0)
