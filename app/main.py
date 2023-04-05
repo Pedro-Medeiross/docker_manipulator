@@ -16,6 +16,7 @@ user_id = os.getenv('USER_ID')
 Iq = IqOption(user_id)
 # Conexão à API
 Iq.connect()
+Iq.set_account_type()
 print('Conectado à API')
 instance = Iq.instance()
 
@@ -32,9 +33,9 @@ amount = None
 action = None
 
 
-def update_monitored_pairs():
+def update_monitored_pairs(user_id: int):
     # Obtém os pares de moedas disponíveis para negociação
-    trade_info_pairs = asyncio.run(api.get_trade_info_pairs())
+    trade_info_pairs = asyncio.run(api.get_trade_info_pairs(user_id))
     print(trade_info_pairs)
     # Adiciona os pares que ainda não estão sendo monitorados
     for par in trade_info_pairs:
@@ -45,7 +46,7 @@ def update_monitored_pairs():
 
 while status_bot == 1:
     print('Verificando status do bot...')
-    update_monitored_pairs()
+    update_monitored_pairs(user_id)
     trade_info_ids = asyncio.run(api.get_trade_user_info_scheduled(user_id))
     for pair in monitored_pairs:
         print('Verificando par: ', pair)
@@ -59,21 +60,17 @@ while status_bot == 1:
             for trade_info_id in trade_info_ids:
                 trade_info = asyncio.run(api.get_trade_info(trade_info_id))
                 user_values = asyncio.run(api.get_user_values_by_trade_id(trade_info_id))
-                price = trade_info['cotacao']
-                actions = trade_info['tipo_negocio']
-                time_frame = trade_info['time']
-                if actions == "C":
-                    action = "call"
-                elif actions == "P":
-                    action = "put"
-                amount = user_values['value']
+                price = trade_info['price']
+                action = trade_info['method']
+                time_frame = trade_info['timeframe']
+                amount = user_values['ammount']
                 trade_status = user_values['status']
                 if candle == price:
                     if trade_status == 0:
                         print('Comprando', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
                         instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                   duration=time_frame)
-                        asyncio.run(api.set_schedule_status(trade_info_id, 1))
+                        asyncio.run(api.set_schedule_status(trade_info_id, status=1, user_id=user_id))
 
         if pair not in monitored_pairs:
             break

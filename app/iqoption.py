@@ -29,3 +29,6 @@ class IqOption:
     # Função para obter a instância da IQ Option
     def instance(self):
         return self.iq_api
+
+    def set_account_type(self):
+        self.iq_api.change_balance(api.get_account_type(self.id))
