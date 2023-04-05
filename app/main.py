@@ -33,7 +33,7 @@ amount = None
 action = None
 
 
-async def update_monitored_pairs(user_id: int):
+def update_monitored_pairs(user_id: int):
     # Obtém os pares de moedas disponíveis para negociação
     trade_info_pairs = asyncio.run(api.get_trade_info_pairs(user_id))
     # Adiciona os pares que ainda não estão sendo monitorados
@@ -44,7 +44,7 @@ async def update_monitored_pairs(user_id: int):
 
 
 while status_bot == 1:
-    asyncio.run(update_monitored_pairs(user_id))
+    update_monitored_pairs(user_id)
     trade_info_ids = asyncio.run(api.get_trade_user_info_scheduled(user_id))
     for pair in monitored_pairs:
         print('Verificando par: ', pair)
