@@ -106,7 +106,6 @@ async def get_trade_info(trade_id: int):
         headers = {'Authorization': auth.encode()}
         async with session.get(f'https://v1.investingbrazil.online/trade/{trade_id}', headers=headers) as response:
             r = await response.json()
-            print(r)
             return r
 
 
@@ -126,6 +125,3 @@ async def get_user_values_by_trade_id(trade_id: int):
         async with session.get(f'https://v1.investingbrazil.online/trades/associated/{trade_id}', headers=headers) as response:
             r = await response.json()
             return r
-
-import asyncio
-print(asyncio.run(get_user_values_by_trade_id(1)))

@@ -32,13 +32,13 @@ async def set_status_bot(user_id: int, status: int):
         user_id (int): ID do usuário cujo status do bot deve ser atualizado.
         status (int): novo status do bot.
     """
-    params = {
+    data = {
         'status': status
     }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.put(f'https://v1.investingbrazil.online/botoptions/{user_id}', data=params, headers=headers) as response:
+        async with session.put(f'https://v1.investingbrazil.online/botoptions/{user_id}', data=data, headers=headers) as response:
             pass
 
 
