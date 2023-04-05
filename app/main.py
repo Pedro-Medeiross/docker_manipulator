@@ -51,7 +51,7 @@ while status_bot == 1:
         print('Verificando par: ', pair)
         if pair not in candles_streams:
             candles_streams[pair] = instance.start_candles_stream(pair, 1, 1)
-        candles = candles_streams[pair]
+        candles = instance.get_realtime_candles(pair, 1)
         candle = 0
         for key in list(candles.keys()):
             candle = candles[key]["open"]
