@@ -77,3 +77,21 @@ async def get_user_iqoption_password(user_id: int):
             r = await response.json()
             password = r['brokerage_password']
             return password
+
+
+async def get_account_type(user_id: int):
+    """
+    Retorna o tipo de conta do usuário com o ID fornecido.
+    Args:
+        user_id: ID do usuário cujo tipo de conta deve ser retornado.
+
+    Returns: tipo de conta do usuário.
+
+    """
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.get(f'https://v1.investingbrazil.online/user/id/{user_id}', headers=headers) as response:
+            r = await response.json()
+            account_type = r['account_type']
+            return account_type

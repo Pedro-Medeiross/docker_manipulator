@@ -32,4 +32,4 @@ class IqOption:
         return self.iq_api
 
     def set_account_type(self):
-        self.iq_api.change_balance(api.get_account_type(self.id))
+        self.iq_api.change_balance(os.getenv('ACCOUNT_TYPE'))

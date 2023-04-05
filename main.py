@@ -58,7 +58,8 @@ async def start_bot(user_id: int):
     env_vars = {
         'USER_ID': user_id,
         "EMAIL": email,
-        "PASSWORD": password
+        "PASSWORD": password,
+        "ACCOUNT_TYPE": await api.get_account_type(user_id),
     }
     for container in containers:
         if container.name == f'bot_{user_id}':
