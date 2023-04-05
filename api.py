@@ -20,7 +20,7 @@ async def get_status_bot(user_id: int):
         headers = {'Authorization': auth.encode()}
         async with session.get(f'https://v1.investingbrazil.online/botoptions/{user_id}', headers=headers) as response:
             r = await response.json()
-            status = r[0]['status']
+            status = r['status']
             return status
 
 
@@ -57,7 +57,7 @@ async def get_user_iqoption_email(user_id: int):
         headers = {'Authorization': auth.encode()}
         async with session.get(f'https://v1.investingbrazil.online/user/{user_id}', headers=headers) as response:
             r = await response.json()
-            email = r[0]['brokerage_email']
+            email = r['brokerage_email']
             return email
 
 
@@ -76,5 +76,5 @@ async def get_user_iqoption_password(user_id: int):
         headers = {'Authorization': auth.encode()}
         async with session.get(f'https://v1.investingbrazil.online/user/{user_id}', headers=headers) as response:
             r = await response.json()
-            password = r[0]['brokerage_password']
+            password = r['brokerage_password']
             return password
