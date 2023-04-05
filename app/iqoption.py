@@ -13,8 +13,8 @@ class IqOption:
     # Função para realizar a conexão com a IQ Option
     def connect(self):
         # Obtendo o email e senha da IQ Option
-        email = await(api.get_user_iqoption_email(self.id))
-        password = base64.b64decode(await(api.get_user_iqoption_password(self.id))).decode()
+        email = api.get_user_iqoption_email(self.id)
+        password = base64.b64decode(api.get_user_iqoption_password(self.id)).decode()
 
         # Criando uma instância da IQ Option
         self.iq_api = IQ_Option(email, password)

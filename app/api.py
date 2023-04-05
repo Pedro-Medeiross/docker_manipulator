@@ -24,7 +24,7 @@ async def get_status_bot(user_id: int):
             return status
 
 
-async def get_user_iqoption_email(user_id: int):
+def get_user_iqoption_email(user_id: int):
     """
     Retorna o email do usuário com o ID fornecido.
 
@@ -43,7 +43,7 @@ async def get_user_iqoption_email(user_id: int):
             return email
 
 
-async def get_user_iqoption_password(user_id: int):
+def get_user_iqoption_password(user_id: int):
     """
     Retorna a senha do usuário com o ID fornecido.
 
@@ -62,7 +62,7 @@ async def get_user_iqoption_password(user_id: int):
             return password
 
 
-async def get_account_type(user_id: int):
+def get_account_type(user_id: int):
     """
     Retorna o tipo de conta do usuário com o ID fornecido.
     Args:
