@@ -39,9 +39,9 @@ def update_monitored_pairs(user_id: int):
     print(trade_info_pairs)
     # Adiciona os pares que ainda não estão sendo monitorados
     for par in trade_info_pairs:
-        if par[0] not in monitored_pairs:
-            monitored_pairs.append(par[0])
-            print('Monitorando par: ', par[0])
+        if par not in monitored_pairs:
+            monitored_pairs.append(par)
+            print('Monitorando par: ', par)
 
 
 while status_bot == 1:
