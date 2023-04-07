@@ -58,12 +58,13 @@ while status_bot == 1:
     for pair in monitored_pairs:
         print('Verificando par: ', pair)
         candles = instance.get_realtime_candles(pair, 1)
-        candle = 0
         for key in list(candles.keys()):
-            print(key)
+            print(list(candles.keys()))
+            print('aqui')
             candle = candles[key]["open"]
             print(f'par: {pair} candle: {candle}')
             for trade_info_id in trade_info_ids:
+                print('ablubé')
                 trade_info = asyncio.run(api.get_trade_info(trade_info_id))
                 user_values = asyncio.run(api.get_user_values_by_trade_id(trade_info_id))
                 price = trade_info['price']
