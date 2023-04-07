@@ -38,24 +38,22 @@ def update_monitored_pairs(user_id: int):
     trade_info_pairs = asyncio.run(api.get_trade_info_pairs(user_id))
     # Adiciona os pares que ainda não estão sendo monitorados
     for par in trade_info_pairs:
-        for pairs in instance.get_all_ACTIVES_OPCODE():
-            if pairs == par:
-                if par not in monitored_pairs:
-                    monitored_pairs.append(par)
-                    print('Monitorando par: ', par)
+        if par not in monitored_pairs:
+            monitored_pairs.append(par)
+            print('Monitorando par: ', par)
     for p in monitored_pairs:
         if p not in candles_streams:
             start_candle_stream(p)
-        if p not in instance.get_all_ACTIVES_OPCODE():
-            print('Par não disponível para negociação: ', p)
-            instance.stop_candles_stream(p)
-            monitored_pairs.remove(p)
 
 
-def start_candle_stream(pair: str):
+def start_candle_stream(pairs: str):
     # Inicia o stream de velas para o par
-    candles_streams[pair] = instance.start_candles_stream(pair, 1, 1)
-    print('Iniciando stream de velas para o par: ', pair)
+    for pairx in instance.get_all_ACTIVES_OPCODE():
+        if pairx == pairs:
+            candles_streams[pair] = instance.start_candles_stream(pairs, 1, 1)
+            print('Iniciando stream de velas para o par: ', pairs)
+        else:
+            print('Par não disponível para negociação: ', pairs)
 
 
 while status_bot == 1:
@@ -85,4 +83,4 @@ while status_bot == 1:
 
         if pair not in monitored_pairs:
             instance.stop_candles_stream(pair)
-        time.sleep(1)
+            print('Par não está mais sendo monitorado: ', pair)
