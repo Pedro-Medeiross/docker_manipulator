@@ -38,8 +38,8 @@ def update_monitored_pairs(user_id: int):
     trade_info_pairs = asyncio.run(api.get_trade_info_pairs(user_id))
     # Adiciona os pares que ainda não estão sendo monitorados
     for par in trade_info_pairs:
-        for pair in instance.get_all_open_time():
-            if pair['active'] == par:
+        for pairs in instance.get_all_ACTIVES_OPCODE():
+            if pairs == par:
                 if par not in monitored_pairs:
                     monitored_pairs.append(par)
                     print('Monitorando par: ', par)
