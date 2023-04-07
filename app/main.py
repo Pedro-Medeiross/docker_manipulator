@@ -50,7 +50,7 @@ def start_candle_stream(pairs: str):
     # Inicia o stream de velas para o par
     for pairx in instance.get_all_ACTIVES_OPCODE():
         if pairx == pairs:
-            candles_streams[pair] = instance.start_candles_stream(pairs, 1, 1)
+            candles_streams[pairs] = instance.start_candles_stream(pairs, 1, 1)
             print('Iniciando stream de velas para o par: ', pairs)
         else:
             print('Par não disponível para negociação: ', pairs)
