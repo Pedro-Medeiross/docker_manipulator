@@ -50,11 +50,12 @@ def update_monitored_pairs(user_id: int):
 
 def start_candle_stream(pairs: str):
     # Inicia o stream de velas para o par
-    if pairx not in instance.get_all_ACTIVES_OPCODE():
-        print('Par não disponível para negociação: ', pairs)
-        if pairx in candles_streams:
-            instance.stop_candles_stream(pairs)
-            candles_streams.pop(pairs)
+    for pairx in instance.get_all_ACTIVES_OPCODE():
+        if pairx not in instance.get_all_ACTIVES_OPCODE():
+            print('Par não disponível para negociação: ', pairs)
+            if pairx in candles_streams:
+                instance.stop_candles_stream(pairs)
+                candles_streams.pop(pairs)
     candles_streams[pairs] = instance.start_candles_stream(pairs, 1, 1)
     print('Iniciando stream de velas para o par: ', pairs)
 
