@@ -43,7 +43,7 @@ def update_monitored_pairs(user_id: int):
                 if par not in monitored_pairs:
                     monitored_pairs.append(par)
                     print('Monitorando par: ', par)
-    if p in monitored_pairs:
+    for p in monitored_pairs:
         if p not in candles_streams:
             start_candle_stream(p)
 
