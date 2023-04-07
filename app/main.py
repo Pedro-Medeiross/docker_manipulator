@@ -75,7 +75,6 @@ while status_bot == 1:
             print('Verificando par: ', pair)
             candles = instance.get_realtime_candles(pair, 1)
             for key in list(candles.keys()):
-                print(list(candles.keys()))
                 candle = candles[key]["open"]
                 print(f'par: {pair} candle: {candle}')
         if candle == price:
@@ -91,4 +90,4 @@ while status_bot == 1:
             monitored_pairs.remove(pair)
             print('Par não está mais sendo monitorado: ', pair)
 
-    time.sleep(1)
+    time.sleep(1.5)
