@@ -54,7 +54,7 @@ def update_monitored_pairs(user_id: int):
 
 def start_candle_stream(pair: str):
     # Inicia o stream de velas para o par
-    candles_streams[pair] = instance.start_candles_stream(pair, "all", 1)
+    candles_streams[pair] = instance.start_candles_stream(pair, 1, 1)
     print('Iniciando stream de velas para o par: ', pair)
 
 
@@ -63,7 +63,7 @@ while status_bot == 1:
     trade_info_ids = asyncio.run(api.get_trade_user_info_scheduled(user_id))
     for pair in monitored_pairs:
         print('Verificando par: ', pair)
-        candles = instance.get_realtime_candles(pair, "all")
+        candles = instance.get_realtime_candles(pair, 1)
         candle = 0
         for key in list(candles.keys()):
             candle = candles[key]["open"]
