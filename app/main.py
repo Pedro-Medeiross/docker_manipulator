@@ -60,6 +60,7 @@ while status_bot == 1:
         candles = instance.get_realtime_candles(pair, 1)
         candle = 0
         for key in list(candles.keys()):
+            print(key)
             candle = candles[key]["open"]
             print(f'par: {pair} candle: {candle}')
             for trade_info_id in trade_info_ids:
