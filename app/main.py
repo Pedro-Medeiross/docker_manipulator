@@ -103,4 +103,3 @@ while status_bot == 1:
     trade_info_ids = asyncio.run(api.get_trade_user_info_scheduled(user_id))
     for trade_info_id in trade_info_ids:
         asyncio.run(buy_trade(trade_info_id))
-    time.sleep(1)
