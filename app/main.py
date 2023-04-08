@@ -74,11 +74,8 @@ async def buy_trade(trade_info_id : int):
         for key in list(candles.keys()):
             candle = candles[key]["open"]
             print(f'par: {pair} candle: {candle}')
-    print(f"price: {price} candle: {candle}")
-    print(type(candle))
-    print(type(price))
-    if candle == float(price):
-        print(type(float(price)))
+    if candle - float(price) < 0.0001:
+        print((float(price)))
         if trade_status == 0:
             if type == 'D':
                 if instance.get_remaning(1) - 10830 >= 1:
