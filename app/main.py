@@ -75,24 +75,15 @@ async def buy_trade(trade_info_id : int):
             candle = candles[key]["open"]
             print(f'par: {pair} candle: {candle}')
     if candle - float(price) < 0.0001:
-        print('Candle: ', candle, 'Preço: ', price)
-        print('Negociação: ', trade_info_id, 'Status: ', trade_status)
         if trade_status == 0:
             if type == 'D':
-                print('Digital')
-                if instance.get_remaning(1) - 10830 >= 1:
-                    print("remaning", instance.get_remaning(1) - 10830)
-                    print('Comprando Digital', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
-                    instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                              duration=int(time_frame))
-                    await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+                instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                                          duration=int(time_frame))
+                await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
             elif type == 'B':
-                print('Binario')
-                if instance.get_remaning(1) - 10830 >= 1:
-                    print("remaning", instance.get_remaning(1) - 10830)
-                    print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
-                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
-                    await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+                print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
 
     if pair not in monitored_pairs:
         instance.stop_candles_stream(pair)
