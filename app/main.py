@@ -79,6 +79,7 @@ async def buy_trade(trade_info_id : int):
         print('Negociação: ', trade_info_id, 'Status: ', trade_status)
         if trade_status == 0:
             if type == 'D':
+                print('Digital')
                 if instance.get_remaning(1) - 10830 >= 1:
                     print("remaning", instance.get_remaning(1) - 10830)
                     print('Comprando Digital', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
@@ -86,6 +87,7 @@ async def buy_trade(trade_info_id : int):
                                               duration=int(time_frame))
                     await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
             elif type == 'B':
+                print('Binario')
                 if instance.get_remaning(1) - 10830 >= 1:
                     print("remaning", instance.get_remaning(1) - 10830)
                     print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
