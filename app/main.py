@@ -81,14 +81,18 @@ while status_bot == 1:
         if candle == float(price):
             if trade_status == 0:
                 if type == 'D':
-                    print('Comprando Digital', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
-                    instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                    if instance.get_remaning(1) - 10830 >= 1:
+                        print("remaning", instance.get_remaning(1) - 10830)
+                        print('Comprando Digital', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                        instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                               duration=int(time_frame))
-                    asyncio.run(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+                        asyncio.run(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
                 elif type == 'B':
-                    print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
-                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
-                    asyncio.run(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+                    if instance.get_remaning(1) - 10830 >= 1:
+                        print("remaning", instance.get_remaning(1) - 10830)
+                        print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                        instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                        asyncio.run(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
 
         if pair not in monitored_pairs:
             instance.stop_candles_stream(pair)
