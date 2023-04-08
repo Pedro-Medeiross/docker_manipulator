@@ -71,6 +71,7 @@ while status_bot == 1:
         time_frame = trade_info['timeframe']
         amount = user_values['ammount']
         trade_status = user_values['status']
+        type = trade_info['type']
         for pair in monitored_pairs:
             print('Verificando par: ', pair)
             candles = instance.get_realtime_candles(pair, 1)
@@ -79,10 +80,15 @@ while status_bot == 1:
                 print(f'par: {pair} candle: {candle}')
         if candle == price:
             if trade_status == 0:
-                print('Comprando', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
-                instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                          duration=time_frame)
-                asyncio.run(api.set_schedule_status(trade_info_id, status=1, user_id=user_id))
+                if type == 'D':
+                    print('Comprando Digital', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                    instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                                              duration=time_frame)
+                    asyncio.run(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+                elif type == 'B':
+                    print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                    asyncio.run(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
 
         if pair not in monitored_pairs:
             instance.stop_candles_stream(pair)
