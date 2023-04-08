@@ -70,12 +70,13 @@ async def buy_trade(trade_info_id : int):
     trade_status = user_values['status']
     type = trade_info['type']
     for pair in monitored_pairs:
-        print('Verificando par: ', pair)
         candles = instance.get_realtime_candles(pair, 1)
         for key in list(candles.keys()):
             candle = candles[key]["open"]
             print(f'par: {pair} candle: {candle}')
+    print(f"price: {price} candle: {candle}")
     if candle == float(price):
+        print(float(price))
         if trade_status == 0:
             if type == 'D':
                 if instance.get_remaning(1) - 10830 >= 1:
