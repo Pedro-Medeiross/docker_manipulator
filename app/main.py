@@ -78,7 +78,7 @@ while status_bot == 1:
             for key in list(candles.keys()):
                 candle = candles[key]["open"]
                 print(f'par: {pair} candle: {candle}')
-        if candle == price:
+        if candle == float(price):
             if trade_status == 0:
                 if type == 'D':
                     print('Comprando Digital', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
