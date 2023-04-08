@@ -60,44 +60,47 @@ def start_candle_stream(pairs: str):
     print('Iniciando stream de velas para o par: ', pairs)
 
 
+async def buy_trade(trade_info_id : int):
+    trade_info = asyncio.run(api.get_trade_info(trade_info_id))
+    user_values = asyncio.run(api.get_user_values_by_trade_id(trade_info_id))
+    price = trade_info['price']
+    action = trade_info['method']
+    time_frame = trade_info['timeframe']
+    amount = user_values['ammount']
+    trade_status = user_values['status']
+    type = trade_info['type']
+    for pair in monitored_pairs:
+        print('Verificando par: ', pair)
+        candles = instance.get_realtime_candles(pair, 1)
+        for key in list(candles.keys()):
+            candle = candles[key]["open"]
+            print(f'par: {pair} candle: {candle}')
+    if candle == float(price):
+        if trade_status == 0:
+            if type == 'D':
+                if instance.get_remaning(1) - 10830 >= 1:
+                    print("remaning", instance.get_remaning(1) - 10830)
+                    print('Comprando Digital', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                    instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                                              duration=int(time_frame))
+                    asyncio.run(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+            elif type == 'B':
+                if instance.get_remaning(1) - 10830 >= 1:
+                    print("remaning", instance.get_remaning(1) - 10830)
+                    print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                    asyncio.run(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+
+    if pair not in monitored_pairs:
+        instance.stop_candles_stream(pair)
+        candles_streams.pop(pair)
+        monitored_pairs.remove(pair)
+        print('Par não está mais sendo monitorado: ', pair)
+
+
 while status_bot == 1:
     update_monitored_pairs(user_id)
     trade_info_ids = asyncio.run(api.get_trade_user_info_scheduled(user_id))
     for trade_info_id in trade_info_ids:
-        trade_info = asyncio.run(api.get_trade_info(trade_info_id))
-        user_values = asyncio.run(api.get_user_values_by_trade_id(trade_info_id))
-        price = trade_info['price']
-        action = trade_info['method']
-        time_frame = trade_info['timeframe']
-        amount = user_values['ammount']
-        trade_status = user_values['status']
-        type = trade_info['type']
-        for pair in monitored_pairs:
-            print('Verificando par: ', pair)
-            candles = instance.get_realtime_candles(pair, 1)
-            for key in list(candles.keys()):
-                candle = candles[key]["open"]
-                print(f'par: {pair} candle: {candle}')
-        if candle == float(price):
-            if trade_status == 0:
-                if type == 'D':
-                    if instance.get_remaning(1) - 10830 >= 1:
-                        print("remaning", instance.get_remaning(1) - 10830)
-                        print('Comprando Digital', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
-                        instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                              duration=int(time_frame))
-                        asyncio.run(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
-                elif type == 'B':
-                    if instance.get_remaning(1) - 10830 >= 1:
-                        print("remaning", instance.get_remaning(1) - 10830)
-                        print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
-                        instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
-                        asyncio.run(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
-
-        if pair not in monitored_pairs:
-            instance.stop_candles_stream(pair)
-            candles_streams.pop(pair)
-            monitored_pairs.remove(pair)
-            print('Par não está mais sendo monitorado: ', pair)
-
-    time.sleep(1.5)
+        asyncio.run(buy_trade(trade_info_id))
+    time.sleep(1)
