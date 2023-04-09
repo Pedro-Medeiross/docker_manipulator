@@ -76,20 +76,21 @@ async def buy_trade(trade_info_id : int):
     amount = user_values['ammount']
     trade_status = user_values['status']
     type = trade_info['type']
-    for pair in monitored_pairs:
+    pair = trade_info['pair']
+    if pair in monitored_pairs:
         candle = await(get_candles(pair))
-    print(f'price: {price}, candle: {candle}')
-    if candle - float(price) < 0.0001:
-        print(f'Comprando {type} {pair} com valor de {price} em {time_frame} minutos')
-        if trade_status == 0:
-            if type == 'D':
-                instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                          duration=int(time_frame))
-                await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
-            elif type == 'B':
-                print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
-                instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
-                await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+        print(f'price: {price}, candle: {candle}')
+        if candle - float(price) < 0.0001:
+            print(f'Comprando {type} {pair} com valor de {price} em {time_frame} minutos')
+            if trade_status == 0:
+                if type == 'D':
+                    instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                                              duration=int(time_frame))
+                    await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+                elif type == 'B':
+                    print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                    await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
 
     if pair not in monitored_pairs:
         instance.stop_candles_stream(pair)
