@@ -32,7 +32,7 @@ amount = None
 # Ação da negociação atual (PUT ou CALL)
 action = None
 # Valor para não nulificar a negociação
-candle = 0
+candle = None
 
 
 def update_monitored_pairs(user_id: int):
