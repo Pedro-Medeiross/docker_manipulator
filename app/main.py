@@ -62,7 +62,7 @@ def start_candle_stream(pairs: str):
 
 async def buy_trade(trade_info_id : int):
     trade_info = await(api.get_trade_info(trade_info_id))
-    user_values = await(api.get_user_values_by_trade_id(trade_info_id))
+    user_values = await(api.get_user_values_by_trade_id(trade_info_id, user_id))
     price = trade_info['price']
     action = trade_info['method']
     time_frame = trade_info['timeframe']
