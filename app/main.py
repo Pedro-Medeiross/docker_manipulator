@@ -74,7 +74,9 @@ async def buy_trade(trade_info_id : int):
         for key in list(candles.keys()):
             candle = candles[key]["open"]
             print(f'par: {pair} candle: {candle}')
+    print(f'price: {price}, candle: {candle}')
     if candle - float(price) < 0.0001:
+        print(f'Comprando {type} {pair} com valor de {price} em {time_frame} minutos')
         if trade_status == 0:
             if type == 'D':
                 instance.buy_digital_spot(active=pair, amount=amount, action=action,
