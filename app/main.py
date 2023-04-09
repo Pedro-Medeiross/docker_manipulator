@@ -80,7 +80,7 @@ async def buy_trade(trade_info_id : int):
     if pair in monitored_pairs:
         candle = await(get_candles(pair))
         print(f'price: {price}, candle: {candle}')
-        if candle - float(price) < 0.0001:
+        if candle == float(price):
             print(f'Comprando {type} {pair} com valor de {price} em {time_frame} minutos')
             if trade_status == 0:
                 if type == 'D':
