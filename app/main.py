@@ -63,8 +63,8 @@ def start_candle_stream(pairs: str):
 async def get_candles(pair: str):
     candles = instance.get_realtime_candles(pair, 1)
     for key in list(candles.keys()):
-        candle = candles[key]["open"]
-    return candle
+        candlx = candles[key]["open"]
+    return candlx
 
 
 async def buy_trade(trade_info_id : int):
@@ -77,7 +77,7 @@ async def buy_trade(trade_info_id : int):
     trade_status = user_values['status']
     type = trade_info['type']
     for pair in monitored_pairs:
-        await(get_candles(pair))
+        candle = await(get_candles(pair))
     print(f'price: {price}, candle: {candle}')
     if candle - float(price) < 0.0001:
         print(f'Comprando {type} {pair} com valor de {price} em {time_frame} minutos')
