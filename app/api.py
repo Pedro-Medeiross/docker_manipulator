@@ -109,7 +109,7 @@ async def get_trade_info(trade_id: int):
             return r
 
 
-async def get_user_values_by_trade_id(trade_id: int):
+async def get_user_values_by_trade_id(trade_id: int, user_id: int):
     """
     Retorna os valores do usuário com o ID fornecido.
 
@@ -122,6 +122,6 @@ async def get_user_values_by_trade_id(trade_id: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get(f'https://v1.investingbrazil.online/trades/associated/{trade_id}', headers=headers) as response:
+        async with session.get(f'https://v1.investingbrazil.online/trades/associated/{trade_id}/{user_id}', headers=headers) as response:
             r = await response.json()
             return r
