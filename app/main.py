@@ -81,7 +81,7 @@ async def buy_trade(trade_info_id : int):
         candle = await(get_candles(pair))
         print(f'price: {price}, candle: {candle}')
         if candle == float(price):
-            print(f'Comprando {type} {pair} com valor de {price} em {time_frame} minutos')
+            print(f'Vela igual ao preço: {candle} = {price}')
             if trade_status == 0:
                 if type == 'D':
                     instance.buy_digital_spot(active=pair, amount=amount, action=action,
