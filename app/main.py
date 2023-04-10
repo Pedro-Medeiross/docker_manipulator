@@ -64,6 +64,7 @@ async def start_candle_stream(pairs: str):
 
 
 async def get_candles(pair: str):
+    print('Obtendo velas para o par: ', pair)
     candles = instance.get_realtime_candles(pair, 1)
     for key in list(candles.keys()):
         candlx = candles[key]["open"]
@@ -104,6 +105,7 @@ async def buy_trade(trade_info_id : int):
 
 
 async def main():
+    print('iniciando loop principal')
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
     print(f'trade_info_ids: {trade_info_ids}')
     for trade_id in trade_info_ids:
