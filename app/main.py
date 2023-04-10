@@ -3,11 +3,14 @@ import time
 import api
 from iqoption import IqOption
 import asyncio
+from asyncio import tasks
 
 # Pares que serão monitorados
 monitored_pairs = []
 # Velas que serão monitoradas para cada par
 candles_streams = {}
+
+buy_tasks = []
 
 # ID do usuário
 print('Iniciando bot...')
@@ -68,6 +71,7 @@ async def get_candles(pair: str):
 
 
 async def buy_trade(trade_info_id : int):
+    print('Iniciando negociação: ', trade_info_id)
     trade_info = await(api.get_trade_info(trade_info_id))
     user_values = await(api.get_user_values_by_trade_id(trade_info_id, user_id))
     price = trade_info['price']
@@ -103,4 +107,7 @@ while status_bot == 1:
     update_monitored_pairs(user_id)
     trade_info_ids = asyncio.run(api.get_trade_user_info_scheduled(user_id))
     for trade_info_id in trade_info_ids:
-        asyncio.run(buy_trade(trade_info_id))
+        for task in buy_tasks:
+           if task.get_name() != str(trade_info_id):
+                task = asyncio.create_task(buy_trade(trade_info_id), name=str(trade_info_id))
+                buy_tasks.append(task)
