@@ -13,14 +13,12 @@ candles_streams = {}
 buy_tasks = []
 
 # ID do usuário
-print('Iniciando bot...')
 user_id = os.getenv('USER_ID')
 # Instância da API da IQ Option
 Iq = IqOption(user_id)
 # Conexão à API
 Iq.connect()
 Iq.set_account_type()
-print('Conectado à API')
 instance = Iq.instance()
 
 # Status do bot
@@ -45,7 +43,6 @@ async def update_monitored_pairs(user_id: int):
     for par in trade_info_pairs:
         if par not in monitored_pairs:
             monitored_pairs.append(par)
-            print('Monitorando par: ', par)
     for p in monitored_pairs:
         if p not in candles_streams:
             await start_candle_stream(p)
@@ -55,12 +52,10 @@ async def start_candle_stream(pairs: str):
     # Inicia o stream de velas para o par
     for pairx in instance.get_all_ACTIVES_OPCODE():
         if pairx not in instance.get_all_ACTIVES_OPCODE():
-            print('Par não disponível para negociação: ', pairs)
             if pairx in candles_streams:
                 instance.stop_candles_stream(pairs)
                 candles_streams.pop(pairs)
     candles_streams[pairs] = instance.start_candles_stream(pairs, 1, 1)
-    print('Iniciando stream de velas para o par: ', pairs)
 
 
 async def get_candles(pair: str):
@@ -72,7 +67,6 @@ async def get_candles(pair: str):
 
 
 async def buy_trade(trade_info_id : int):
-    print('Iniciando negociação: ', trade_info_id)
     trade_info = await(api.get_trade_info(trade_info_id))
     user_values = await(api.get_user_values_by_trade_id(trade_info_id, user_id))
     price = trade_info['price']
@@ -101,30 +95,23 @@ async def buy_trade(trade_info_id : int):
         instance.stop_candles_stream(pair)
         candles_streams.pop(pair)
         monitored_pairs.remove(pair)
-        print('Par não está mais sendo monitorado: ', pair)
 
 
 async def main():
-    print('iniciando loop principal')
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
-    print(f'trade_info_ids: {trade_info_ids}')
     for trade_id in trade_info_ids:
-        print(f'trade_id: {trade_id}')
         if buy_tasks:
             for task in buy_tasks:
                 if task.get_name() == str(trade_info_id):
-                    print('task já existe')
                     break
-        print(f'task: {trade_id}, {buy_tasks}')
         task = asyncio.create_task(buy_trade(trade_id), name=str(trade_info_id))
         buy_tasks.append(task)
-    try:
-        asyncio.run(asyncio.gather(*buy_tasks))
-    except RuntimeError:
-        asyncio.set_event_loop(asyncio.new_event_loop())
-        asyncio.run(asyncio.gather(*buy_tasks))
+    await asyncio.gather(*buy_tasks)
 
+
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 
 while True:
-    asyncio.run(update_monitored_pairs(user_id))
-    asyncio.run(main())
+    loop.run_until_complete(update_monitored_pairs(user_id))
+    loop.run_until_complete(main())
