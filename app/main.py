@@ -67,6 +67,7 @@ async def get_candles(pair: str):
 
 
 async def buy_trade(trade_info_id : int):
+    print('Iniciando negociação: ', trade_info_id)
     trade_info = await(api.get_trade_info(trade_info_id))
     user_values = await(api.get_user_values_by_trade_id(trade_info_id, user_id))
     price = trade_info['price']
@@ -105,7 +106,6 @@ async def main():
             if any(task.get_name() == str(trade_info_id) for task in buy_tasks):
                 continue
             task = loop.run_in_executor(executor, buy_trade, trade_info_id)
-            task.set_name(str(trade_info_id))
             buy_tasks.append(task)
     await asyncio.gather(*buy_tasks)
 
