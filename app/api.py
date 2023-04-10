@@ -53,17 +53,12 @@ async def get_trade_info_pairs(user_id: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get(f'https://v1.investingbrazil.online/trades/{user_id}', headers=headers) as response:
+        async with session.get(f'https://v1.investingbrazil.online/trades/pairs/{user_id}', headers=headers) as response:
             r = await response.json()
-            ids = []
-            pairs = []
+            all = []
             for i in r:
-                ids.append(i['trade_id'])
-            for j in ids:
-                async with session.get(f'https://v1.investingbrazil.online/trade/{j}', headers=headers) as response:
-                    r = await response.json()
-                    pairs.append(r['pair'])
-            return pairs
+                all.append(i['pair'])
+            return all
 
 
 async def get_trade_user_info_scheduled(user_id: int):
