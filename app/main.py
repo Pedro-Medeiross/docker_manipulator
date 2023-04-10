@@ -111,6 +111,7 @@ async def main():
             print(f'agendando negociação: {trade_info_id}...')
             task = loop.run_in_executor(executor, buy_trade, trade_info_id)
             buy_tasks.append(task)
+    print('Aguardando negociações...')
     await asyncio.gather(*buy_tasks)
 
 
