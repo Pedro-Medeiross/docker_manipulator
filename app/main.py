@@ -24,7 +24,7 @@ print('Conectado à API')
 instance = Iq.instance()
 
 # Status do bot
-status_bot = await(api.get_status_bot(user_id))
+status_bot = asyncio.run(api.get_status_bot(user_id))
 
 # Status da negociação atual
 trade_status = None
