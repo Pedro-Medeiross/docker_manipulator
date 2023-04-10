@@ -103,11 +103,16 @@ async def buy_trade(trade_info_id : int):
         print('Par não está mais sendo monitorado: ', pair)
 
 
-while status_bot == 1:
+async def main():
     update_monitored_pairs(user_id)
-    trade_info_ids = asyncio.run(api.get_trade_user_info_scheduled(user_id))
-    for trade_info_id in trade_info_ids:
+    trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
+    for trade_id in trade_info_ids:
         for task in buy_tasks:
-           if task.get_name() != str(trade_info_id):
-                task = asyncio.create_task(buy_trade(trade_info_id), name=str(trade_info_id))
+            if task.get_name() != str(trade_info_id):
+                task = asyncio.create_task(buy_trade(trade_id), name=str(trade_info_id))
                 buy_tasks.append(task)
+    await asyncio.gather(*buy_tasks)
+
+
+while True:
+    asyncio.run(main())
