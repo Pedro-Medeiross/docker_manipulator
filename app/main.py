@@ -112,7 +112,9 @@ async def main():
             buy_tasks.append(future)
         print('Aguardando negociações...')
         concurrent.futures.wait(buy_tasks)
-        buy_tasks = [task for task in buy_tasks if not task.done()]
+        for future in concurrent.futures.as_completed(buy_tasks):
+            print(future.result())
+            buy_tasks.remove(future)
         print('Negociações finalizadas')
 
 loop = asyncio.new_event_loop()
@@ -122,4 +124,3 @@ while True:
     print('Iniciando loop...')
     loop.run_until_complete(update_monitored_pairs(user_id))
     loop.run_until_complete(main())
-    print(buy_tasks)
