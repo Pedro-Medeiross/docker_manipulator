@@ -1,6 +1,9 @@
+import asyncio
+
 import aiohttp
 import os
 from dotenv import load_dotenv
+import concurrent.futures
 
 load_dotenv()
 
@@ -43,6 +46,12 @@ async def set_schedule_status(trade_id: int, status: int, user_id: int):
             return await response.json()
 
 
+async def get_pair(session, headers, trade_id):
+    async with session.get(f'https://v1.investingbrazil.online/trade/{trade_id}', headers=headers) as response:
+        r = await response.json()
+        return r['pair']
+
+
 async def get_trade_info_pairs(user_id: int):
     """
     Retorna as moedas que podem ser negociadas.
@@ -55,18 +64,20 @@ async def get_trade_info_pairs(user_id: int):
         headers = {'Authorization': auth.encode()}
         async with session.get(f'https://v1.investingbrazil.online/trades/{user_id}', headers=headers) as response:
             r = await response.json()
-            ids = []
+            loop = asyncio.get_running_loop()
+            # Loop 1: preenche a lista de ids
+            ids = await asyncio.gather(*[loop.run_in_executor(None, lambda x: x['trade_id'], i) for i in r])
+
+            # Loop 2: busca informações de cada id usando a API
             pairs = []
-            for i in r:
-                ids.append(i['trade_id'])
-            for j in ids:
-                async with session.get(f'https://v1.investingbrazil.online/trade/{j}', headers=headers) as response:
-                    r = await response.json()
-                    pairs.append(r['pair'])
+            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                tasks = [loop.run_in_executor(executor, get_pair, session, headers, j) for j in ids]
+                pairs = await asyncio.gather(*tasks)
+
             return pairs
 
 
-async def get_trade_user_info_scheduled(user_id: int):
+async def Sget_trade_user_info_scheduled(user_id: int):
     """
     Retorna as informações de trade do usuário com o ID fornecido.
 
