@@ -104,14 +104,11 @@ async def main():
     print('Negociações agendadas: ', trade_info_ids)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         print(f'Iniciando {len(trade_info_ids)} negociações...')
-        loop = asyncio.get_running_loop()
         buy_tasks = []
         for trade_info_id in trade_info_ids:
-            print(f'agendando negociação: {trade_info_id}...')
             future = executor.submit(buy_trade, trade_info_id)
             buy_tasks.append(future)
-        print('Aguardando negociações...')
-        concurrent.futures.wait(buy_tasks)
+        print(f'lista de compras {buy_tasks}')
         for future in concurrent.futures.as_completed(buy_tasks):
             print(future.result())
             buy_tasks.remove(future)
