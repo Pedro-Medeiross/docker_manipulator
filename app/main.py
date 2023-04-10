@@ -37,6 +37,7 @@ candle = None
 
 
 async def update_monitored_pairs(user_id: int):
+    print('Atualizando pares monitorados...')
     # Obtém os pares de moedas disponíveis para negociação
     trade_info_pairs = await(api.get_trade_info_pairs(user_id))
     # Adiciona os pares que ainda não estão sendo monitorados
@@ -49,6 +50,7 @@ async def update_monitored_pairs(user_id: int):
 
 
 async def start_candle_stream(pairs: str):
+    print('Iniciando stream de velas para o par: ', pairs)
     # Inicia o stream de velas para o par
     for pairx in instance.get_all_ACTIVES_OPCODE():
         if pairx not in instance.get_all_ACTIVES_OPCODE():
@@ -99,6 +101,7 @@ async def buy_trade(trade_info_id : int):
 
 
 async def main():
+    print('Iniciando negociação...')
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         loop = asyncio.get_running_loop()
