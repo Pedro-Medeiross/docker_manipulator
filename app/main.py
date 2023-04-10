@@ -109,10 +109,12 @@ async def main():
         loop = asyncio.get_running_loop()
         for trade_info_id in trade_info_ids:
             print(f'agendando negociação: {trade_info_id}...')
-            task = loop.run_in_executor(executor, buy_trade, trade_info_id)
-            buy_tasks.append(task)
+            future = loop.run_in_executor(executor, buy_trade, trade_info_id)
+            buy_tasks.append(future)
         print('Aguardando negociações...')
-        await asyncio.gather(*buy_tasks)
+        for task in buy_tasks:
+            await task
+
 
 
 loop = asyncio.new_event_loop()
