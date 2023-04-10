@@ -104,9 +104,10 @@ async def buy_trade(trade_info_id : int):
 
 
 async def main():
-    await update_monitored_pairs(user_id)
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
+    print(f'trade_info_ids: {trade_info_ids}')
     for trade_id in trade_info_ids:
+        print(f'trade_id: {trade_id}')
         for task in buy_tasks:
             print(f'task: {task}, {buy_tasks}')
             if task.get_name() != str(trade_info_id):
@@ -116,4 +117,5 @@ async def main():
 
 
 while True:
+    asyncio.run(update_monitored_pairs(user_id))
     asyncio.run(main())
