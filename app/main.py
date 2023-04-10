@@ -106,12 +106,10 @@ async def main():
         print(f'Iniciando {len(trade_info_ids)} negociações...')
         buy_tasks = []
         for trade_info_id in trade_info_ids:
-            future = executor.submit(buy_trade, trade_info_id)
+            future = asyncio.ensure_future(buy_trade(trade_info_id))
             buy_tasks.append(future)
-        print(f'lista de compras {buy_tasks}')
-        for future in concurrent.futures.as_completed(buy_tasks):
-            print(future.result())
-            buy_tasks.remove(future)
+        print(f'Iniciando {len(trade_info_ids)} negociações...')
+        await asyncio.gather(*buy_tasks)
         print('Negociações finalizadas')
 
 loop = asyncio.new_event_loop()
