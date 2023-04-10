@@ -110,11 +110,14 @@ async def main():
     print(f'trade_info_ids: {trade_info_ids}')
     for trade_id in trade_info_ids:
         print(f'trade_id: {trade_id}')
-        for task in buy_tasks:
-            print(f'task: {task}, {buy_tasks}')
-            if task.get_name() != str(trade_info_id):
-                task = asyncio.create_task(buy_trade(trade_id), name=str(trade_info_id))
-                buy_tasks.append(task)
+        if buy_tasks:
+            for task in buy_tasks:
+                if task.get_name() == str(trade_info_id):
+                    print('task já existe')
+                    break
+        print(f'task: {trade_id}, {buy_tasks}')
+        task = asyncio.create_task(buy_trade(trade_id), name=str(trade_info_id))
+        buy_tasks.append(task)
     await asyncio.gather(*buy_tasks)
 
 
