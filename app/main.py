@@ -112,8 +112,7 @@ async def main():
             future = loop.run_in_executor(executor, buy_trade, trade_info_id)
             buy_tasks.append(future)
         print('Aguardando negociações...')
-        print()
-
+        await asyncio.gather(*buy_tasks)
 
 
 loop = asyncio.new_event_loop()
@@ -123,5 +122,4 @@ while True:
     print('Iniciando loop...')
     loop.run_until_complete(update_monitored_pairs(user_id))
     loop.run_until_complete(main())
-    for task in buy_tasks:
-        loop.run_until_complete(task)
+    print(buy_tasks)
