@@ -108,7 +108,7 @@ async def main():
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
     for trade_id in trade_info_ids:
         for task in buy_tasks:
-            print(f'{task.get_name()} == {trade_info_id}')
+            print(f'task: {task}, {buy_tasks}')
             if task.get_name() != str(trade_info_id):
                 task = asyncio.create_task(buy_trade(trade_id), name=str(trade_info_id))
                 buy_tasks.append(task)
