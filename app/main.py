@@ -10,8 +10,6 @@ monitored_pairs = []
 # Velas que serão monitoradas para cada par
 candles_streams = {}
 
-buy_tasks = []
-
 # ID do usuário
 user_id = os.getenv('USER_ID')
 # Instância da API da IQ Option
@@ -107,12 +105,15 @@ async def main():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         print(f'Iniciando {len(trade_info_ids)} negociações...')
         loop = asyncio.get_running_loop()
+        buy_tasks = []
         for trade_info_id in trade_info_ids:
             print(f'agendando negociação: {trade_info_id}...')
             future = executor.submit(buy_trade, trade_info_id)
             buy_tasks.append(future)
         print('Aguardando negociações...')
         concurrent.futures.wait(buy_tasks)
+        buy_tasks = [task for task in buy_tasks if not task.done()]
+        print('Negociações finalizadas')
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
