@@ -103,8 +103,6 @@ async def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         loop = asyncio.get_running_loop()
         for trade_info_id in trade_info_ids:
-            if any(task.get_name() == str(trade_info_id) for task in buy_tasks):
-                continue
             task = loop.run_in_executor(executor, buy_trade, trade_info_id)
             buy_tasks.append(task)
     await asyncio.gather(*buy_tasks)
