@@ -107,7 +107,10 @@ async def main():
     await update_monitored_pairs(user_id)
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
     for trade_id in trade_info_ids:
+        print(trade_id)
         for task in buy_tasks:
+            print(task.get_name())
+            print(trade_info_id)
             if task.get_name() != str(trade_info_id):
                 task = asyncio.create_task(buy_trade(trade_id), name=str(trade_info_id))
                 buy_tasks.append(task)
