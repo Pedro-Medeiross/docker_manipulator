@@ -3,7 +3,7 @@ import time
 import api
 from iqoption import IqOption
 import asyncio
-from asyncio import tasks
+import concurrent.futures
 
 # Pares que serão monitorados
 monitored_pairs = []
@@ -99,13 +99,14 @@ async def buy_trade(trade_info_id : int):
 
 async def main():
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
-    for trade_id in trade_info_ids:
-        if buy_tasks:
-            for task in buy_tasks:
-                if task.get_name() == str(trade_info_id):
-                    break
-        task = asyncio.create_task(buy_trade(trade_id), name=str(trade_info_id))
-        buy_tasks.append(task)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        loop = asyncio.get_running_loop()
+        for trade_info_id in trade_info_ids:
+            if any(task.get_name() == str(trade_info_id) for task in buy_tasks):
+                continue
+            task = loop.run_in_executor(executor, buy_trade, trade_info_id)
+            task.name(str(trade_info_id))
+            buy_tasks.append(task)
     await asyncio.gather(*buy_tasks)
 
 
