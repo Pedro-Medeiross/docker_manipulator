@@ -82,7 +82,7 @@ async def buy_trade(trade_info_id : int):
     if pair in monitored_pairs:
         candle = await(get_candles(pair))
         print(f'price: {price}, candle: {candle}')
-        if candle == float(price):
+        if str(candle) == price:
             print(f'Vela igual ao preço: {candle} = {price}')
             if trade_status == 0:
                 if type == 'D':
@@ -103,9 +103,12 @@ async def buy_trade(trade_info_id : int):
 async def main():
     print('Iniciando negociação...')
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    print('Negociações agendadas: ', trade_info_ids)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        print(f'Iniciando {len(trade_info_ids)} negociações...')
         loop = asyncio.get_running_loop()
         for trade_info_id in trade_info_ids:
+            print(f'agendando negociação: {trade_info_id}...')
             task = loop.run_in_executor(executor, buy_trade, trade_info_id)
             buy_tasks.append(task)
     await asyncio.gather(*buy_tasks)
@@ -115,5 +118,6 @@ loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
 while True:
+    print('Iniciando loop...')
     loop.run_until_complete(update_monitored_pairs(user_id))
     loop.run_until_complete(main())
