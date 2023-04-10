@@ -24,7 +24,7 @@ print('Conectado à API')
 instance = Iq.instance()
 
 # Status do bot
-status_bot = asyncio.run(api.get_status_bot(user_id))
+status_bot = await(api.get_status_bot(user_id))
 
 # Status da negociação atual
 trade_status = None
@@ -38,9 +38,9 @@ action = None
 candle = None
 
 
-def update_monitored_pairs(user_id: int):
+async def update_monitored_pairs(user_id: int):
     # Obtém os pares de moedas disponíveis para negociação
-    trade_info_pairs = asyncio.run(api.get_trade_info_pairs(user_id))
+    trade_info_pairs = await(api.get_trade_info_pairs(user_id))
     # Adiciona os pares que ainda não estão sendo monitorados
     for par in trade_info_pairs:
         if par not in monitored_pairs:
@@ -48,10 +48,10 @@ def update_monitored_pairs(user_id: int):
             print('Monitorando par: ', par)
     for p in monitored_pairs:
         if p not in candles_streams:
-            start_candle_stream(p)
+            await start_candle_stream(p)
 
 
-def start_candle_stream(pairs: str):
+async def start_candle_stream(pairs: str):
     # Inicia o stream de velas para o par
     for pairx in instance.get_all_ACTIVES_OPCODE():
         if pairx not in instance.get_all_ACTIVES_OPCODE():
@@ -104,7 +104,7 @@ async def buy_trade(trade_info_id : int):
 
 
 async def main():
-    update_monitored_pairs(user_id)
+    await update_monitored_pairs(user_id)
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
     for trade_id in trade_info_ids:
         for task in buy_tasks:
