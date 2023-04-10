@@ -85,11 +85,10 @@ async def get_trade_user_info_scheduled(user_id: int):
         async with session.get(f'https://v1.investingbrazil.online/trades/{user_id}', params=params,
                                headers=headers) as response:
             r = await response.json()
-            trade_info_ids = []
+            all = []
             for i in r:
-                trade_info_ids.append(i['trade_id'])
-            return trade_info_ids
-
+                all.append(i['trade_id'])
+            return all
 
 async def get_trade_info(trade_id: int):
     """
