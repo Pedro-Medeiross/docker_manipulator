@@ -118,7 +118,11 @@ async def main():
         print(f'task: {trade_id}, {buy_tasks}')
         task = asyncio.create_task(buy_trade(trade_id), name=str(trade_info_id))
         buy_tasks.append(task)
-    await asyncio.gather(*buy_tasks)
+    try:
+        asyncio.run(asyncio.gather(*buy_tasks))
+    except RuntimeError:
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        asyncio.run(asyncio.gather(*buy_tasks))
 
 
 while True:
