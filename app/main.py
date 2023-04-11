@@ -118,6 +118,7 @@ async def buy_trade(trade_info_id : int):
                             instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
+    await asyncio.sleep(1.5)
 
 
 
