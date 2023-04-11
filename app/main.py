@@ -90,13 +90,13 @@ async def buy_trade(trade_info_id : int):
                 print(f'Vela igual ao preço: {candle} = {price}')
                 if trade_status == 0:
                     if type == 'D':
-                        print('Comprando Digital', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                        print(f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {new_range}')
                         instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                   duration=int(time_frame))
                         await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
                         await(api.set_trade_associated_exited_if_buy(trade_info_id))
                     elif type == 'B':
-                        print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                        print(f'Comprando Binario {pair} com valor de {price} em {time_frame}, minutos, com range de {new_range}')
                         instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                         await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
                         await(api.set_trade_associated_exited_if_buy(trade_info_id))
