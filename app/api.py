@@ -162,7 +162,7 @@ async def set_trade_associated_exited_if_buy(trade_id: int):
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.put(f'https://v1.investingbrazil.online/accept/trades/{trade_id}',
+            async with session.post(f'https://v1.investingbrazil.online/accept/trades/{trade_id}',
                                    headers=headers) as response:
                 return await response.json()
         except:
