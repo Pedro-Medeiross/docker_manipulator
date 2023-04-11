@@ -85,6 +85,7 @@ async def buy_trade(trade_info_id : int):
         interval = range(digit - 3, digit + 4)
         for i in interval:
             new_range = num_str[:-1] + str(i)
+            print(f'Vela: {candle} = {new_range}')
             if new_range == price:
                 print(f'Vela igual ao preço: {candle} = {price}')
                 if trade_status == 0:
