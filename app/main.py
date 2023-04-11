@@ -84,6 +84,10 @@ async def buy_trade(trade_info_id : int):
         digit = int(num_str[-1])
         interval = range(digit - 3, digit + 4)
         for i in interval:
+            remaining1 = instance.get_remaning(1)
+            remaining2 = instance.get_remaning(2)
+            remaining5 = instance.get_remaning(5)
+            print(f'Restante: {remaining1}, {remaining2}, {remaining5}')
             new_range = num_str[:-1] + str(i)
             print(f'Vela: {candle} = {new_range}')
             if new_range == price:
@@ -96,10 +100,25 @@ async def buy_trade(trade_info_id : int):
                         await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
                         await(api.set_trade_associated_exited_if_buy(trade_info_id))
                     elif type == 'B':
-                        print(f'Comprando Binario {pair} com valor de {price} em {time_frame}, minutos, com range de {new_range}')
-                        instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
-                        await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
-                        await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                        if remaining1 == 60 and time_frame == 1:
+                            print(
+                                f'Comprando Binario {pair} com valor de {price} em {time_frame}, minutos, com range de {new_range}')
+                            instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                            await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                        if remaining2 == 90 and time_frame == 1.3:
+                            print(
+                                f'Comprando Binario {pair} com valor de {price} em {time_frame}, minutos, com range de {new_range}')
+                            instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                            await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                        if remaining5 == 300 and time_frame == 1.5:
+                            print(
+                                f'Comprando Binario {pair} com valor de {price} em {time_frame}, minutos, com range de {new_range}')
+                            instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                            await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
+
 
     if pair not in monitored_pairs:
         instance.stop_candles_stream(pair)
