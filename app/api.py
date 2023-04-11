@@ -149,3 +149,23 @@ async def get_user_values_by_trade_id(trade_id: int, user_id: int):
             if response.status != 200:
                 new_attempt = await get_user_values_by_trade_id(trade_id, user_id)
                 return new_attempt
+
+
+async def set_trade_associated_exited_if_buy(trade_id: int):
+    """
+    Atualiza o status do agendamento de todos os usuários que não aceitaram a trade até o momento da compra.
+
+    Args:
+        trade_id = ID da trade cujo status do agendamento deve ser atualizado.
+    """
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        try:
+            async with session.put(f'https://v1.investingbrazil.online/accept/trades/{trade_id}',
+                                   headers=headers) as response:
+                return await response.json()
+        except:
+            if response.status != 200:
+                new_attempt = await set_trade_associated_exited_if_buy(trade_id)
+                return new_attempt
