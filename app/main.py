@@ -80,17 +80,22 @@ async def buy_trade(trade_info_id : int):
     if pair in monitored_pairs:
         candle = await(get_candles(pair))
         print(f'price: {price}, candle: {candle}')
-        if str(candle) == price:
-            print(f'Vela igual ao preço: {candle} = {price}')
-            if trade_status == 0:
-                if type == 'D':
-                    instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                              duration=int(time_frame))
-                    await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
-                elif type == 'B':
-                    print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
-                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
-                    await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+        num_str = str(candle)
+        digit = int(num_str[-1])
+        interval = range(digit - 3, digit + 4)
+        for i in interval:
+            new_range = num_str[:-1] + str(i)
+            if new_range == price:
+                print(f'Vela igual ao preço: {candle} = {price}')
+                if trade_status == 0:
+                    if type == 'D':
+                        instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                                                  duration=int(time_frame))
+                        await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
+                    elif type == 'B':
+                        print('Comprando Binario', pair, 'com valor de', price, 'em', time_frame, 'minutos', )
+                        instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                        await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
 
     if pair not in monitored_pairs:
         instance.stop_candles_stream(pair)
