@@ -100,7 +100,7 @@ async def buy_trade(trade_info_id : int):
                         print(f'Verificando tempo restante para compra de binário: {remaining}')
                         if 30 < remaining < 90:
                             print(f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {new_range}')
-                            instance.buy(2, pair, amount, action, time_frame)
+                            instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=1, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
     await asyncio.sleep(1)
