@@ -84,7 +84,7 @@ async def buy_trade(trade_info_id : int):
         digit = int(num_str[-1])
         interval = range(digit - 3, digit + 4)
         for i in interval:
-            remaining = instance.get_remaning(2)
+            remaining = instance.get_remaning(1)
             new_range = num_str[:-1] + str(i)
             print(f'Vela: {candle} = {new_range}')
             if new_range == price:
