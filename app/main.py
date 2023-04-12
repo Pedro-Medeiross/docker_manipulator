@@ -87,6 +87,11 @@ async def buy_trade(trade_info_id : int):
             remaining = instance.get_remaning(1)
             new_range = num_str[:-1] + str(i)
             print(f'Vela: {candle} = {new_range}')
+            price_decimals = len(price.split('.')[1])
+            candle_decimals = len(new_range.split('.')[1])
+            if price_decimals != candle_decimals:
+                candle_rounded = round(candle, price_decimals)
+                new_range = str(candle_rounded)
             if new_range == price:
                 print(f'Vela igual ao preço: {candle} = {price}')
                 if trade_status == 0:
