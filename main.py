@@ -3,8 +3,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import docker
 import api
+import secrets
+from fastapi.security import HTTPBasicCredentials, HTTPBasic
+from fastapi import Depends, HTTPException, status
 
 app = FastAPI()
+security = HTTPBasic()
 
 
 origins = ["http://localhost:3000", "http://127.0.0.1/8000", "http://localhost:8000", "http://localhost:3000",
@@ -20,6 +24,19 @@ app.add_middleware(
 
 client = docker.from_env()
 
+
+def get_basic_credentials(credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(credentials.username, os.getenv('API_USER'))
+    correct_password = secrets.compare_digest(credentials.password, os.getenv('API_PASS'))
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuário ou senha incorretos",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+
 # Verifica se a imagem docker já existe, senão constrói uma nova.
 images = client.images.list()
 if 'docker_bot:latest' not in [image.tags[0] for image in images]:
@@ -32,7 +49,7 @@ else:
 
 
 @app.get("/start/{user_id}")
-async def start_bot(user_id: int):
+async def start_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
     """
     Inicia um novo contêiner para executar o ‘cluster’ para um determinado usuário, se ele ainda não estiver em
     execução.
@@ -76,7 +93,7 @@ async def start_bot(user_id: int):
 
 
 @app.get("/stop/{user_id}")
-async def stop_bot(user_id: int):
+async def stop_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
     """
     Para a execução do ‘cluster’ para um determinado usuário, se ele estiver em execução.
 
@@ -101,7 +118,7 @@ async def stop_bot(user_id: int):
 
 
 @app.get("/status/{user_id}")
-async def status_bot(user_id: int):
+async def status_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
     """
     Endpoint que retorna o estado do ‘cluster’ do usuário com o ID fornecido.
 

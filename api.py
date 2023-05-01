@@ -18,7 +18,7 @@ async def get_status_bot(user_id: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get(f'https://v1.investingbrazil.online/botoptions/{user_id}', headers=headers) as response:
+        async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/{user_id}', headers=headers) as response:
             r = await response.json()
             status = r['status']
             return status
@@ -38,9 +38,10 @@ async def set_status_bot(user_id: int, status: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.put(f'https://v1.investingbrazil.online/botoptions/{user_id}', json=payload, headers=headers) as response:
+        async with session.put(f'https://v1.investingbrazil.online/bot/botoptions/{user_id}', json=payload, headers=headers) as response:
             r = await response.json()
             return r
+
 
 async def get_user_iqoption_email(user_id: int):
     """
@@ -59,6 +60,7 @@ async def get_user_iqoption_email(user_id: int):
             r = await response.json()
             email = r['brokerage_email']
             return email
+
 
 async def get_user_iqoption_password(user_id: int):
     """
