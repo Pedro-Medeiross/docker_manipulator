@@ -44,7 +44,6 @@ async def get_news_status(user_id: int):
                 return new_attempt
 
 
-
 async def set_schedule_status(trade_id: int, status: int, user_id: int):
     """
     Atualiza o status da trade de um usuário.
@@ -224,9 +223,8 @@ async def get_trade_status_by_user_id_and_trade_id(trade_id: int, user_id: int):
         try:
             async with session.get(f'https://v1.investingbrazil.online/trades/status/{trade_id}/{user_id}', headers=headers) as response:
                 r = await response.json()
-                return r
+                return r['status_trade']
         except:
             if response.status != 200:
                 new_attempt = await get_user_values_by_trade_id(trade_id, user_id)
                 return new_attempt
-
