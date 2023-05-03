@@ -94,13 +94,13 @@ async def buy_trade(trade_info_id: int):
             zone2 = float(price) + num1
             if float(candle) >= zone1 and float(candle) <= zone2:
                 print(f'Vela igual ao preço: {candle} = {price}')
-                if news_status:
-                    values = api.get_news_filter()
-                    for x in values:
-                        if x['pair'] == pair:
-                            if now in x['range_hours']:
-                                print('Notícia de alto impacto, não é recomendado negociar')
-                                return
+                # if news_status:
+                #     values = api.get_news_filter()
+                #     for x in values:
+                #         if x['pair'] == pair:
+                #             if now in x['range_hours']:
+                #                 print('Notícia de alto impacto, não é recomendado negociar')
+                #                 return
                 if trade_status == 2:
                     if type == 'D':
                         print(
@@ -149,13 +149,13 @@ async def buy_trade(trade_info_id: int):
             zone2 = float(price) + num2
             if float(candle) >= zone1 and float(candle) <= zone2:
                 print(f'Vela igual ao preço: {candle} = {price}')
-                if news_status:
-                    values = api.get_news_filter()
-                    for x in values:
-                        if x['pair'] == pair:
-                            if now in x['range_hours']:
-                                print('Notícia de alto impacto, não é recomendado negociar')
-                                return
+                # if news_status:
+                #     values = api.get_news_filter()
+                #     for x in values:
+                #         if x['pair'] == pair:
+                #             if now in x['range_hours']:
+                #                 print('Notícia de alto impacto, não é recomendado negociar')
+                #                 return
                 if trade_status == 2:
                     if type == 'D':
                         print(
