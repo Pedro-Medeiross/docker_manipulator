@@ -75,11 +75,12 @@ async def buy_trade(trade_info_id: int):
     print('Iniciando negociação: ', trade_info_id)
     trade_info = await(api.get_trade_info(trade_info_id))
     user_values = await(api.get_user_values_by_trade_id(trade_info_id, user_id))
+    trades_status = await(api.get_trade_status_by_user_id_and_trade_id(user_id, trade_info_id))
     price = trade_info['price']
     action = trade_info['method']
     time_frame = trade_info['timeframe']
     amount = user_values['amount']
-    trade_status = user_values['status']
+    trade_status = trades_status['trade_status']
     type = trade_info['type']
     pair = trade_info['pair']
     news_status = api.get_news_status(user_id)

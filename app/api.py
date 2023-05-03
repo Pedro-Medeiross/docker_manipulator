@@ -206,3 +206,27 @@ async def get_news_filter():
             if response.status != 200:
                 new_attempt = await get_news_filter()
                 return new_attempt
+
+
+async def get_trade_status_by_user_id_and_trade_id(trade_id: int, user_id: int):
+    """
+    Retorna os valores do usuário com o ID fornecido.
+
+    Args:
+        trade_info_id (int): ID do usuário cujos valores devem ser retornados.
+
+    Returns:
+        list: lista de dicionários contendo os valores do usuário.
+    """
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        try:
+            async with session.get(f'https://v1.investingbrazil.online/trades/status/{trade_id}/{user_id}', headers=headers) as response:
+                r = await response.json()
+                return r
+        except:
+            if response.status != 200:
+                new_attempt = await get_user_values_by_trade_id(trade_id, user_id)
+                return new_attempt
+
