@@ -6,6 +6,7 @@ from iqoption import IqOption
 import asyncio
 import concurrent.futures
 
+print('Iniciando bot...')
 # Pares que serão monitorados
 monitored_pairs = []
 # Velas que serão monitoradas para cada par
@@ -15,13 +16,16 @@ candles_streams = {}
 user_id = os.getenv('USER_ID')
 # Instância da API da IQ Option
 Iq = IqOption(user_id)
+print('Conectando à API...')
 # Conexão à API
 Iq.connect()
 Iq.set_account_type()
 instance = Iq.instance()
+print('Conectado à API...')
 
 # Status do bot
 status_bot = asyncio.run(api.get_status_bot(user_id))
+print('Status do bot: ', status_bot)
 
 # Status da negociação atual
 trade_status = None
