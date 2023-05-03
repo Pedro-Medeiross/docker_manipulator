@@ -80,7 +80,7 @@ async def buy_trade(trade_info_id: int):
     action = trade_info['method']
     time_frame = trade_info['timeframe']
     amount = user_values['amount']
-    trade_status = trades_status['trade_status']
+    trade_status = trades_status['status_trade']
     type = trade_info['type']
     pair = trade_info['pair']
     news_status = api.get_news_status(user_id)
