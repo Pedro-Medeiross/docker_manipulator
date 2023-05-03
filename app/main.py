@@ -78,7 +78,7 @@ async def buy_trade(trade_info_id: int):
     price = trade_info['price']
     action = trade_info['method']
     time_frame = trade_info['timeframe']
-    amount = user_values['ammount']
+    amount = user_values['amount']
     trade_status = user_values['status']
     type = trade_info['type']
     pair = trade_info['pair']
