@@ -82,6 +82,8 @@ async def buy_trade(trade_info_id: int):
     trade_status = await(api.get_trade_status_by_user_id_and_trade_id(user_id=user_id, trade_id=trade_info_id))
     type = trade_info['type']
     pair = trade_info['pair']
+    pair1 = pair[0:3]
+    pair2 = pair[3:6]
     news_status = await(api.get_news_status(user_id))
     localtime = time.localtime()
     now = time.strftime('%H:%M', localtime)
@@ -97,7 +99,7 @@ async def buy_trade(trade_info_id: int):
                 if news_status:
                     values = await(api.get_news_filter())
                     for x in values:
-                        if x['pair'] == pair:
+                        if x['pair'] == pair1 or x['pair'] == pair2:
                             if now in x['range_hours']:
                                 print('Notícia de alto impacto, não é recomendado negociar')
                                 return
@@ -152,7 +154,7 @@ async def buy_trade(trade_info_id: int):
                 if news_status:
                     values = await(api.get_news_filter())
                     for x in values:
-                        if x['pair'] == pair:
+                        if x['pair'] == pair1 or x['pair'] == pair2:
                             if now in x['range_hours']:
                                 print('Notícia de alto impacto, não é recomendado negociar')
                                 return
