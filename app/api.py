@@ -228,3 +228,12 @@ async def get_trade_status_by_user_id_and_trade_id(trade_id: int, user_id: int):
             if response.status != 200:
                 new_attempt = await get_user_values_by_trade_id(trade_id, user_id)
                 return new_attempt
+
+import asyncio
+import time
+localtime = time.localtime()
+now = time.strftime('%H:%M', localtime)
+teste = asyncio.run(get_news_filter())
+for x in teste:
+    if x['pair'] == 'USD':
+        if now in x['']
