@@ -102,6 +102,7 @@ async def buy_trade(trade_info_id: int):
                         if x['pair'] == pair1 or x['pair'] == pair2:
                             if now in x['range_hours']:
                                 print('Notícia de alto impacto, não é recomendado negociar')
+                                await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
                                 return
                 if trade_status == 2:
                     if type == 'D':
@@ -157,6 +158,7 @@ async def buy_trade(trade_info_id: int):
                         if x['pair'] == pair1 or x['pair'] == pair2:
                             if now in x['range_hours']:
                                 print('Notícia de alto impacto, não é recomendado negociar')
+                                await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
                                 return
                 if trade_status == 2:
                     if type == 'D':
