@@ -96,14 +96,14 @@ async def buy_trade(trade_info_id: int):
             zone2 = float(price) + num1
             if float(candle) >= zone1 and float(candle) <= zone2:
                 print(f'Vela igual ao preço: {candle} = {price}')
-                if news_status:
-                    values = await(api.get_news_filter())
-                    for x in values:
-                        if x['pair'] == pair1 or x['pair'] == pair2:
-                            if now in x['range_hours']:
-                                print('Notícia de alto impacto, não é recomendado negociar')
-                                await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
-                                return
+                # if news_status:
+                #     values = await(api.get_news_filter())
+                #     for x in values:
+                #         if x['pair'] == pair1 or x['pair'] == pair2:
+                #             if now in x['range_hours']:
+                #                 print('Notícia de alto impacto, não é recomendado negociar')
+                #                 await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
+                #                 return
                 if trade_status == 2:
                     if type == 'D':
                         print(
@@ -152,14 +152,14 @@ async def buy_trade(trade_info_id: int):
             zone2 = float(price) + num2
             if float(candle) >= zone1 and float(candle) <= zone2:
                 print(f'Vela igual ao preço: {candle} = {price}')
-                if news_status:
-                    values = await(api.get_news_filter())
-                    for x in values:
-                        if x['pair'] == pair1 or x['pair'] == pair2:
-                            if now in x['range_hours']:
-                                print('Notícia de alto impacto, não é recomendado negociar')
-                                await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
-                                return
+                # if news_status:
+                #     values = await(api.get_news_filter())
+                #     for x in values:
+                #         if x['pair'] == pair1 or x['pair'] == pair2:
+                #             if now in x['range_hours']:
+                #                 print('Notícia de alto impacto, não é recomendado negociar')
+                #                 await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
+                #                 return
                 if trade_status == 2:
                     if type == 'D':
                         print(
