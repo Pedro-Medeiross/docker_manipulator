@@ -93,7 +93,7 @@ async def buy_trade(trade_info_id: int):
             num1 = (float(price) / 100000) * 0.5
             num2 = (float(price) / 100000) * 0.5
             zone1 = float(price) - num2
-            zone2 = float(price)
+            zone2 = float(price) + num1
             if float(candle) >= zone1 and float(candle) <= zone2:
                 print(f'Vela igual ao preço: {candle} = {price}')
                 if news_status:
@@ -148,7 +148,7 @@ async def buy_trade(trade_info_id: int):
         elif action == 'call':
             num1 = (float(price) / 100000) * 0.5
             num2 = (float(price) / 100000) * 0.5
-            zone1 = float(price)
+            zone1 = float(price) - num1
             zone2 = float(price) + num2
             if float(candle) >= zone1 and float(candle) <= zone2:
                 print(f'Vela igual ao preço: {candle} = {price}')
