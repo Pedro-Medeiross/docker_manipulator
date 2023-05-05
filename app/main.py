@@ -204,7 +204,6 @@ async def buy_trade(trade_info_id: int):
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
 
-    await asyncio.sleep(1)
 
     # if pair not in monitored_pairs:
     #     instance.stop_candles_stream(pair)
