@@ -47,9 +47,9 @@ async def update_monitored_pairs(user_id: int):
     for par in trade_info_pairs:
         if par not in monitored_pairs:
             monitored_pairs.append(par)
-    for p in monitored_pairs:
-        if p not in candles_streams:
-            await start_candle_stream(p)
+    # for p in monitored_pairs:
+    #     if p not in candles_streams:
+    #         await start_candle_stream(p)
 
 
 async def start_candle_stream(pairs: str):
@@ -232,5 +232,5 @@ asyncio.set_event_loop(loop)
 
 while True:
     print('Iniciando loop...')
-    # loop.run_until_complete(update_monitored_pairs(user_id))
+    loop.run_until_complete(update_monitored_pairs(user_id))
     loop.run_until_complete(main())
