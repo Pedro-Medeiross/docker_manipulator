@@ -67,8 +67,8 @@ async def get_candles(pair: str):
     print('Obtendo velas para o par: ', pair)
     horario = time.time()
     candles = instance.get_candles(pair, 1, 1, horario)
-    for key in list(candles.keys()):
-        candlx = candles[key]["close"]
+    for key in list(candles):
+        candlx = key["close"]
         print('Vela: ', candlx)
     return candlx
 
