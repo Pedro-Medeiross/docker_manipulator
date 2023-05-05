@@ -69,7 +69,6 @@ async def get_candles(pair: str):
     candles = instance.get_candles(pair, 1, 1, horario)
     for key in list(candles):
         candlx = key["close"]
-        print('Vela: ', candlx)
     return candlx
 
 
@@ -96,6 +95,7 @@ async def buy_trade(trade_info_id: int):
             num2 = (float(price) / 100000) * 0.1
             zone1 = float(price) - num2
             zone2 = float(price) + num1
+            print(f'Vela atual: {candle}, preço: {price}, zona 1: {zone1}, zona 2: {zone2}')
             if float(candle) >= zone1 and float(candle) <= zone2:
                 print(f'Vela igual ao preço: {candle} = {price}')
                 if news_status:
