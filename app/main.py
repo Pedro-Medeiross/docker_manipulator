@@ -90,7 +90,7 @@ async def buy_trade(trade_info_id: int):
     if pair in monitored_pairs:
         candle = await(get_candles(pair))
         if action == 'put':
-            num1 = (float(price) / 100000) * 5
+            num1 = (float(price) / 100000) * 6
             num2 = (float(price) / 100000) * 0.1
             zone1 = float(price) - num2
             zone2 = float(price) + num1
@@ -147,7 +147,7 @@ async def buy_trade(trade_info_id: int):
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
         elif action == 'call':
             num1 = (float(price) / 100000) * 0.1
-            num2 = (float(price) / 100000) * 1
+            num2 = (float(price) / 100000) * 6
             zone1 = float(price) - num1
             zone2 = float(price) + num2
             if float(candle) >= zone1 and float(candle) <= zone2:
