@@ -65,9 +65,11 @@ async def start_candle_stream(pairs: str):
 
 async def get_candles(pair: str):
     print('Obtendo velas para o par: ', pair)
-    candles = instance.get_realtime_candles(pair, 1)
+    horario = time.time()
+    candles = instance.get_candles(pair, 1, 1, horario)
     for key in list(candles.keys()):
-        candlx = candles[key]["open"]
+        candlx = candles[key]["close"]
+        print('Vela: ', candlx)
     return candlx
 
 
@@ -230,5 +232,5 @@ asyncio.set_event_loop(loop)
 
 while True:
     print('Iniciando loop...')
-    loop.run_until_complete(update_monitored_pairs(user_id))
+    # loop.run_until_complete(update_monitored_pairs(user_id))
     loop.run_until_complete(main())
