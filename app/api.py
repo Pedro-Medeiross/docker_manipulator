@@ -53,7 +53,9 @@ async def set_schedule_status(trade_id: int, status: int, user_id: int):
         status (int): novo status do agendamento.
     """
     data = {
-        'status': status
+        'user_id': user_id,
+        'trade_id': trade_id,
+        'status_trade': status
     }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
