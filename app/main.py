@@ -91,7 +91,7 @@ async def buy_trade(trade_info_id: int):
     if pair in monitored_pairs:
         candle = await(get_candles(pair))
         if action == 'put':
-            num1 = (float(price) / 100000) * 5
+            num1 = (float(price) / 100000) * 3
             num2 = (float(price) / 100000) * 3
             zone1 = float(price) - num2
             zone2 = float(price) + num1
