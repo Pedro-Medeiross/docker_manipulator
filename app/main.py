@@ -206,10 +206,10 @@ async def buy_trade(trade_info_id: int):
 
     await asyncio.sleep(1)
 
-    if pair not in monitored_pairs:
-        instance.stop_candles_stream(pair)
-        candles_streams.pop(pair)
-        monitored_pairs.remove(pair)
+    # if pair not in monitored_pairs:
+    #     instance.stop_candles_stream(pair)
+    #     candles_streams.pop(pair)
+    #     monitored_pairs.remove(pair)
 
 
 async def main():
