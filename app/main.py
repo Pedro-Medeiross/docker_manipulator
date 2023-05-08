@@ -91,6 +91,59 @@ async def buy_trade(trade_info_id: int):
         actual_candle = candle[0]['close']
         past_candle = candle[1]['close']
         if action == 'put':
+            if actual_candle == past_candle:
+                print(f'vela neutra: {actual_candle} = {past_candle}')
+                if float(actual_candle) == float(price):
+                    print(f'Vela igual ao preço: {candle} = {price}')
+                    if news_status:
+                        values = await(api.get_news_filter())
+                        for x in values:
+                            if x['pair'] == pair1 or x['pair'] == pair2:
+                                if now in x['range_hours']:
+                                    print('Notícia de alto impacto, não é recomendado negociar')
+                                    await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
+                                    return
+                    if trade_status == 2:
+                        if type == 'D':
+                            print(
+                                f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
+                            instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                                                      duration=int(time_frame))
+                            await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                        elif type == 'B':
+                            remaining1 = instance.get_remaning(1)
+                            remaining2 = instance.get_remaning(2)
+                            remaining3 = instance.get_remaning(3)
+                            remaining5 = instance.get_remaning(5)
+                            print(f'Verificando tempo restante para compra de binário: {remaining1}, {remaining3}, {remaining5}')
+                            if remaining1 < 60 and time_frame == 2:
+                                if remaining2 > 90 and time_frame == 2:
+                                    print(
+                                        f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
+                                    instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                                    await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            elif remaining1 > 60 and time_frame == 2:
+                                print(
+                                    f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
+                                instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                                await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            if remaining3 < 210 and time_frame == 3:
+                                if remaining3 > 150 and time_frame == 3:
+                                    print(
+                                        f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
+                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                                    await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            if remaining5 < 330 and time_frame == 5:
+                                if remaining5 > 270 and time_frame == 5:
+                                    print(
+                                        f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
+                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                                    await(api.set_trade_associated_exited_if_buy(trade_info_id))
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
                 num1 = (float(price) / 100000) * 7
@@ -207,6 +260,59 @@ async def buy_trade(trade_info_id: int):
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
         elif action == 'call':
+            if actual_candle == past_candle:
+                print(f'vela neutra: {actual_candle} = {past_candle}')
+                if float(actual_candle) == float(price):
+                    print(f'Vela igual ao preço: {candle} = {price}')
+                    if news_status:
+                        values = await(api.get_news_filter())
+                        for x in values:
+                            if x['pair'] == pair1 or x['pair'] == pair2:
+                                if now in x['range_hours']:
+                                    print('Notícia de alto impacto, não é recomendado negociar')
+                                    await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
+                                    return
+                    if trade_status == 2:
+                        if type == 'D':
+                            print(
+                                f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
+                            instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                                                      duration=int(time_frame))
+                            await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                        elif type == 'B':
+                            remaining1 = instance.get_remaning(1)
+                            remaining2 = instance.get_remaning(2)
+                            remaining3 = instance.get_remaning(3)
+                            remaining5 = instance.get_remaning(5)
+                            print(f'Verificando tempo restante para compra de binário: {remaining1}, {remaining3}, {remaining5}')
+                            if remaining1 < 60 and time_frame == 2:
+                                if remaining2 > 90 and time_frame == 2:
+                                    print(
+                                        f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
+                                    instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                                    await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            elif remaining1 > 60 and time_frame == 2:
+                                print(
+                                    f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
+                                instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                                await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            if remaining3 < 210 and time_frame == 3:
+                                if remaining3 > 150 and time_frame == 3:
+                                    print(
+                                        f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
+                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                                    await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            if remaining5 < 330 and time_frame == 5:
+                                if remaining5 > 270 and time_frame == 5:
+                                    print(
+                                        f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
+                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                                    await(api.set_trade_associated_exited_if_buy(trade_info_id))
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
                 num1 = (float(price) / 100000) * 7
