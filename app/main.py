@@ -93,7 +93,7 @@ async def buy_trade(trade_info_id: int):
         if action == 'put':
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
-                num1 = (float(price) / 100000) * 5
+                num1 = (float(price) / 100000) * 7
                 num2 = (float(price) / 100000) * 3
                 zone1 = float(price)
                 zone2 = float(price) + num1
@@ -151,7 +151,7 @@ async def buy_trade(trade_info_id: int):
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
                 num1 = (float(price) / 100000) * 3
-                num2 = (float(price) / 100000) * 5
+                num2 = (float(price) / 100000) * 7
                 zone1 = float(price) - num2
                 zone2 = float(price)
                 if float(actual_candle) >= zone1 and float(actual_candle) <= zone2 or float(actual_candle) == float(price):
@@ -209,7 +209,7 @@ async def buy_trade(trade_info_id: int):
         elif action == 'call':
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
-                num1 = (float(price) / 100000) * 5
+                num1 = (float(price) / 100000) * 7
                 num2 = (float(price) / 100000) * 3
                 zone1 = float(price)
                 zone2 = float(price) + num1
@@ -267,7 +267,7 @@ async def buy_trade(trade_info_id: int):
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
                 num1 = (float(price) / 100000) * 3
-                num2 = (float(price) / 100000) * 5
+                num2 = (float(price) / 100000) * 7
                 zone1 = float(price) - num2
                 zone2 = float(price)
                 if float(actual_candle) <= zone1 and float(actual_candle) >= zone2 or float(actual_candle) == float(price):
