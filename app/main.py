@@ -319,7 +319,7 @@ async def buy_trade(trade_info_id: int):
                 num2 = (float(price) / 100000) * 3
                 zone1 = float(price)
                 zone2 = float(price) + num1
-                if float(actual_candle) >= zone1 and float(actual_candle) <= zone2 or float(actual_candle) == float(price):
+                if float(zone1) >= float(actual_candle) <= float(zone2) or float(actual_candle) == float(price):
                     print(f'Vela igual ao preço: {candle} = {price}')
                     if news_status:
                         values = await(api.get_news_filter())
@@ -376,7 +376,7 @@ async def buy_trade(trade_info_id: int):
                 num2 = (float(price) / 100000) * 7
                 zone1 = float(price) - num2
                 zone2 = float(price)
-                if float(actual_candle) <= zone1 and float(actual_candle) >= zone2 or float(actual_candle) == float(price):
+                if float(zone1) <= float(actual_candle) >= float(zone2) or float(actual_candle) == float(price):
                     print(f'Vela igual ao preço: {candle} = {price}')
                     if news_status:
                         values = await(api.get_news_filter())
