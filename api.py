@@ -97,3 +97,18 @@ async def get_account_type(user_id: int):
             r = await response.json()
             account_type = r['account_type']
             return account_type
+
+
+async def restart_bot(user_id: int):
+    """
+    Reinicia o bot do usuário com o ID fornecido.
+
+    Args:
+        user_id (int): ID do usuário cujo bot deve ser reiniciado.
+    """
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        async with session.post(f'https://bot.investingbrazil.online/restart/{user_id}', headers=headers) as response:
+            r = await response.json()
+            return r

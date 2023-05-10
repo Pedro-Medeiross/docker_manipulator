@@ -144,12 +144,16 @@ async def status_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(g
     status = api.get_status_bot(user_id)
     for container in containers:
         if container.name == f'bot_{user_id}':
-            if container.status == 'exited' and api.get_status_bot(user_id) == 2:
+            if container.status == 'exited' and status == 2:
                 return {'status': 'Parado por stop win!'}
-            elif container.status == 'exited' and api.get_status_bot(user_id) == 3:
+            elif container.status == 'exited' and status == 3:
                 return {'status': 'Parado por stop loss!'}
-            elif container.status == 'exited' and api.get_status_bot(user_id) == 0:
+            elif container.status == 'exited' and status== 0:
                 return {'status': 'Parado!'}
+            elif container.status == 'running' and status == 1:
+                return {'status': 'Rodando!'}
+            elif container.status == 'exited' and status == 1:
+                await api.restart_bot(user_id)
     return {'status': 'App não encontrado'}
 
 
@@ -202,3 +206,25 @@ async def stop_win(user_id: int, credentials: HTTPBasicCredentials = Depends(get
             container.stop()
             return {'message': 'App Parado por stop win!'}
     return {'message': 'Erro ao parar o App'}
+
+
+@app.get("/restart/{user_id}")
+async def restart_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
+    """
+    Reinicia o ‘cluster’ para um determinado usuário, se ele estiver em execução.
+
+    Args:
+        user_id (int): ID do usuário para o qual o ‘cluster’ deve ser reiniciado.
+
+    Returns:
+        dict: dicionário contendo uma mensagem informando se o bot já estava parado ou se o bot foi reiniciado com sucesso.
+    """
+    # Verifica se o bot já está parado.
+    status_bot = await api.get_status_bot(user_id)
+    # Procura pelo contêiner do cluster e o para.
+    containers = client.containers.list(all=True)
+    for container in containers:
+        if container.name == f'bot_{user_id}':
+            container.restart()
+            return {'message': 'App reiniciado!'}
+    return {'message': 'Erro ao reiniciar o App'}
