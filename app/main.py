@@ -66,7 +66,7 @@ async def start_candle_stream(pairs: str):
 async def get_candles(pair: str):
     print('Obtendo velas para o par: ', pair)
     horario = time.time()
-    candles = instance.get_candles(pair, 60, 2, horario)
+    candles = instance.get_candles(pair, 1, 2, horario)
     return candles
 
 
