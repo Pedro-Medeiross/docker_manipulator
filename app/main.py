@@ -26,7 +26,7 @@ print('Conectado à API...')
 asyncio.run(api.reset_management_values(user_id))
 print('Valores de gerenciamento resetados...')
 
-balance = Iq.get_balance()
+balance = instance.get_balance()
 print('Saldo: ', balance)
 asyncio.run(api.set_balance(user_id, balance))
 print('Saldo atualizado...')
