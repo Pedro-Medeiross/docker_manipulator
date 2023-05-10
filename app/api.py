@@ -305,7 +305,8 @@ async def get_management_values(user_id: int):
         headers = {'Authorization': auth.encode()}
         try:
             async with session.get(f'https://v1.investingbrazil.online/management/values/{user_id}', headers=headers) as response:
-                return await response.json()
+                r = await response.json()
+                return r
         except:
             if response.status != 200:
                 new_attempt = await get_management_values(user_id)

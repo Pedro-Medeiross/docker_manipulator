@@ -120,8 +120,6 @@ async def binary_check_win(check_id: int, balance: float):
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
 
 
-
-
 async def stop_by_loss():
     print('Verificando se o bot deve ser parado por perda...')
     management_values = await(api.get_management_by_user_id(user_id))
@@ -238,7 +236,7 @@ async def buy_trade(trade_info_id: int):
                                     await asyncio.gather(*check_win)
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
-                num1 = (float(price) / 100000) * 6
+                num1 = (float(price) / 100000) * 5
                 num2 = (float(price) / 100000) * 3
                 zone1 = float(price)
                 zone2 = float(price) + num1
@@ -316,7 +314,7 @@ async def buy_trade(trade_info_id: int):
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
                 num1 = (float(price) / 100000) * 3
-                num2 = (float(price) / 100000) * 6
+                num2 = (float(price) / 100000) * 5
                 zone1 = float(price) - num2
                 zone2 = float(price)
                 if float(actual_candle) >= zone1 and float(actual_candle) <= zone2 or float(actual_candle) == float(price):
@@ -467,7 +465,7 @@ async def buy_trade(trade_info_id: int):
                                     await asyncio.gather(*check_win)
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
-                num1 = (float(price) / 100000) * 6
+                num1 = (float(price) / 100000) * 5
                 num2 = (float(price) / 100000) * 3
                 zone1 = float(price)
                 zone2 = float(price) + num1
@@ -545,7 +543,7 @@ async def buy_trade(trade_info_id: int):
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
                 num1 = (float(price) / 100000) * 3
-                num2 = (float(price) / 100000) * 6
+                num2 = (float(price) / 100000) * 5
                 zone1 = float(price) - num2
                 zone2 = float(price)
                 if float(actual_candle) >= zone1 and float(actual_candle) <= zone2 or float(actual_candle) == float(price):
