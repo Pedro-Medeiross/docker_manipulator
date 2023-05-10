@@ -23,6 +23,14 @@ Iq.set_account_type()
 instance = Iq.instance()
 print('Conectado à API...')
 
+asyncio.run(api.reset_management_values(user_id))
+print('Valores de gerenciamento resetados...')
+
+balance = Iq.get_balance()
+print('Saldo: ', balance)
+asyncio.run(api.set_balance(user_id, balance))
+print('Saldo atualizado...')
+
 # Status do bot
 status_bot = asyncio.run(api.get_status_bot(user_id))
 print('Status do bot: ', status_bot)
@@ -70,6 +78,70 @@ async def get_candles(pair: str):
     return candles
 
 
+async def digital_check_win(check_id: int):
+    print('Verificando resultado da negociação Digital: ', check_id)
+    while True:
+        check_status, win = instance.check_win_digital_v2(check_id)
+        if check_status is True:
+            break
+    if win < 0:
+        print("you loss "+str(win)+"$")
+        balance = instance.get_balance()
+        value_loss = await api.get_management_values(user_id)['value_loss']
+        new_balance = balance - value_loss
+        new_value_loss = value_loss+win
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
+    else:
+        print("you win "+str(win)+"$")
+        balance = instance.get_balance()
+        value_gain = await api.get_management_values(user_id)['value_gain']
+        new_balance = balance + value_gain
+        new_value_gain = value_gain+win
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
+
+
+async def binary_check_win(check_id: int, balance: float):
+    print('Verificando resultado da negociação Binária: ', check_id)
+    while True:
+        check_status, win = instance.check_win_v4(check_id)
+        if check_status is True:
+            break
+    if win == 'loose':
+        print("you loss "+str(win)+"$")
+        value_loss = await api.get_management_values(user_id)['value_loss']
+        new_balance = balance - value_loss
+        new_value_loss = value_loss+win
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
+    if win == 'win':
+        print("you win "+str(win)+"$")
+        value_gain = await api.get_management_values(user_id)['value_gain']
+        new_balance = balance + value_gain
+        new_value_gain = value_gain+win
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
+
+
+
+
+async def stop_by_loss():
+    print('Verificando se o bot deve ser parado por perda...')
+    management_values = await(api.get_management_by_user_id(user_id))
+    stop_loss = management_values['stop_loss']
+    value_stop = management_values['value_stop']
+    if value_stop['value_loss'] >= stop_loss:
+        print('Parando bot por perda...')
+        await(api.set_status_bot(user_id, 4))
+
+
+async def stop_by_win():
+    print('Verificando se o bot deve ser parado por ganho...')
+    management_values = await(api.get_management_by_user_id(user_id))
+    stop_win = management_values['stop_win']
+    value_gain = management_values['value_gain']
+    if value_gain['value_win'] >= stop_win:
+        print('Parando bot por ganho...')
+        await(api.set_status_bot(user_id, 3))
+
+
 async def buy_trade(trade_info_id: int):
     print('Iniciando negociação: ', trade_info_id)
     trade_info = await(api.get_trade_info(trade_info_id))
@@ -107,10 +179,14 @@ async def buy_trade(trade_info_id: int):
                         if type == 'D':
                             print(
                                 f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                            instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
+                            check_win = []
+                            future = asyncio.ensure_future(digital_check_win(id))
+                            check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            await asyncio.gather(*check_win)
                         elif type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
@@ -121,32 +197,48 @@ async def buy_trade(trade_info_id: int):
                                 if remaining2 > 90 and time_frame == 2:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             elif remaining1 > 60 and time_frame == 2:
                                 print(
                                     f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                                instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check_win = []
+                                future = asyncio.ensure_future(binary_check_win(id))
+                                check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                await asyncio.gather(*check_win)
                             if remaining3 < 210 and time_frame == 3:
                                 if remaining3 > 150 and time_frame == 3:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             if remaining5 < 330 and time_frame == 5:
                                 if remaining5 > 270 and time_frame == 5:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
-                num1 = (float(price) / 100000) * 7
+                num1 = (float(price) / 100000) * 6
                 num2 = (float(price) / 100000) * 3
                 zone1 = float(price)
                 zone2 = float(price) + num1
@@ -164,10 +256,14 @@ async def buy_trade(trade_info_id: int):
                         if type == 'D':
                             print(
                                 f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                            instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
+                            check_win = []
+                            future = asyncio.ensure_future(digital_check_win(id))
+                            check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            await asyncio.gather(*check_win)
                         elif type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
@@ -178,33 +274,49 @@ async def buy_trade(trade_info_id: int):
                                 if remaining2 > 90 and time_frame == 2:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             elif remaining1 > 60 and time_frame == 2:
                                 print(
                                     f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check_win = []
+                                future = asyncio.ensure_future(binary_check_win(id))
+                                check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                await asyncio.gather(*check_win)
                             if remaining3 < 210 and time_frame == 3:
                                 if remaining3 > 150 and time_frame == 3:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             if remaining5 < 330 and time_frame == 5:
                                 if remaining5 > 270 and time_frame == 5:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
                 num1 = (float(price) / 100000) * 3
-                num2 = (float(price) / 100000) * 7
+                num2 = (float(price) / 100000) * 6
                 zone1 = float(price) - num2
                 zone2 = float(price)
                 if float(actual_candle) >= zone1 and float(actual_candle) <= zone2 or float(actual_candle) == float(price):
@@ -221,10 +333,14 @@ async def buy_trade(trade_info_id: int):
                         if type == 'D':
                             print(
                                 f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                            instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
+                            check_win = []
+                            future = asyncio.ensure_future(digital_check_win(id))
+                            check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            await asyncio.gather(*check_win)
                         elif type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
@@ -236,29 +352,45 @@ async def buy_trade(trade_info_id: int):
                                 if remaining2 > 90 and time_frame == 2:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             elif remaining1 > 60 and time_frame == 2:
                                 print(
                                     f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check_win = []
+                                future = asyncio.ensure_future(binary_check_win(id))
+                                check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                await asyncio.gather(*check_win)
                             if remaining3 < 210 and time_frame == 3:
                                 if remaining3 > 150 and time_frame == 3:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             if remaining5 < 330 and time_frame == 5:
                                 if remaining5 > 270 and time_frame == 5:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
         elif action == 'call':
             if actual_candle == past_candle:
                 print(f'vela neutra: {actual_candle} = {past_candle}')
@@ -276,10 +408,14 @@ async def buy_trade(trade_info_id: int):
                         if type == 'D':
                             print(
                                 f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                            instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
+                            check_win = []
+                            future = asyncio.ensure_future(digital_check_win(id))
+                            check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            await asyncio.gather(*check_win)
                         elif type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
@@ -290,32 +426,48 @@ async def buy_trade(trade_info_id: int):
                                 if remaining2 > 90 and time_frame == 2:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             elif remaining1 > 60 and time_frame == 2:
                                 print(
                                     f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                                instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check_win = []
+                                future = asyncio.ensure_future(binary_check_win(id))
+                                check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                await asyncio.gather(*check_win)
                             if remaining3 < 210 and time_frame == 3:
                                 if remaining3 > 150 and time_frame == 3:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             if remaining5 < 330 and time_frame == 5:
                                 if remaining5 > 270 and time_frame == 5:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
-                num1 = (float(price) / 100000) * 7
+                num1 = (float(price) / 100000) * 6
                 num2 = (float(price) / 100000) * 3
                 zone1 = float(price)
                 zone2 = float(price) + num1
@@ -333,10 +485,14 @@ async def buy_trade(trade_info_id: int):
                         if type == 'D':
                             print(
                                 f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                            instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
+                            check_win = []
+                            future = asyncio.ensure_future(digital_check_win(id))
+                            check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            await asyncio.gather(*check_win)
                         elif type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
@@ -347,33 +503,49 @@ async def buy_trade(trade_info_id: int):
                                 if remaining2 > 90 and time_frame == 2:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             elif remaining1 > 60 and time_frame == 2:
                                 print(
                                     f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check_win = []
+                                future = asyncio.ensure_future(binary_check_win(id))
+                                check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                await asyncio.gather(*check_win)
                             if remaining3 < 210 and time_frame == 3:
                                 if remaining3 > 150 and time_frame == 3:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             if remaining5 < 330 and time_frame == 5:
                                 if remaining5 > 270 and time_frame == 5:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check_win = []
+                                    future = asyncio.ensure_future(binary_check_win(id))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
                 num1 = (float(price) / 100000) * 3
-                num2 = (float(price) / 100000) * 7
+                num2 = (float(price) / 100000) * 6
                 zone1 = float(price) - num2
                 zone2 = float(price)
                 if float(actual_candle) >= zone1 and float(actual_candle) <= zone2 or float(actual_candle) == float(price):
@@ -390,10 +562,14 @@ async def buy_trade(trade_info_id: int):
                         if type == 'D':
                             print(
                                 f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                            instance.buy_digital_spot(active=pair, amount=amount, action=action,
+                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
+                            check_win = []
+                            future = asyncio.ensure_future(digital_check_win(id))
+                            check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                            await asyncio.gather(*check_win)
                         elif type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)

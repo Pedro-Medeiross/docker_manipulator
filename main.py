@@ -65,12 +65,12 @@ async def start_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(ge
     # Verifica se o ‘cluster’ já está em execução.
     status_bot = await api.get_status_bot(user_id)
     if status_bot == 1:
-        return {'message': 'Bot already running'}
+        return {'message': 'App ja iniciado!'}
     # Obtém as credenciais do usuário.
     email = await api.get_user_iqoption_email(user_id)
     password = await api.get_user_iqoption_password(user_id)
     if email is None or password is None:
-        return {'message': 'Credentials not found'}
+        return {'message': 'email e senha da corretora não cadastrados'}
     # Verifica se há algum contêiner existente para esse usuário.
     containers = client.containers.list(all=True)
     env_vars = {
@@ -82,10 +82,10 @@ async def start_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(ge
     for container in containers:
         if container.name == f'bot_{user_id}':
             if container.status == 'running':
-                return {'message': 'Bot already running'}
+                return {'message': 'App ja iniciado!'}
             await api.set_status_bot(user_id, 1)
             container.start()
-            return {'message': 'Bot started'}
+            return {'message': 'App iniciado!'}
     # Cria um novo contêiner para esse usuário.
     await api.set_status_bot(user_id, 1)
     client.containers.create(image='docker_bot:latest', name=f'bot_{user_id}', detach=True, environment=env_vars)
@@ -106,16 +106,16 @@ async def stop_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(get
     """
     # Verifica se o bot já está parado.
     status_bot = await api.get_status_bot(user_id)
-    if status_bot == 0:
-        return {'message': 'Bot already stopped'}
+    if status_bot in [0, 2, 3]:
+        return {'message': 'App ja parado!'}
     # Procura pelo contêiner do cluster e o para.
     containers = client.containers.list(all=True)
     for container in containers:
         if container.name == f'bot_{user_id}':
             await api.set_status_bot(user_id, 0)
             container.stop()
-            return {'message': 'Bot stopped'}
-    return {'message': 'Bot not found'}
+            return {'message': 'App Parado'}
+    return {'message': 'Erro ao parar o App'}
 
 
 @app.get("/status/{user_id}")
@@ -141,7 +141,64 @@ async def status_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(g
         }
     """
     containers = client.containers.list(all=True)
+    status = api.get_status_bot(user_id)
     for container in containers:
         if container.name == f'bot_{user_id}':
-            return {'status': container.status}
-    return {'status': 'Bot not found'}
+            if container.status == 'exited' and api.get_status_bot(user_id) == 2:
+                return {'status': 'Parado por stop win!'}
+            elif container.status == 'exited' and api.get_status_bot(user_id) == 3:
+                return {'status': 'Parado por stop loss!'}
+            elif container.status == 'exited' and api.get_status_bot(user_id) == 0:
+                return {'status': 'Parado!'}
+    return {'status': 'App não encontrado'}
+
+
+
+app.get("/stop_loss/{user_id}")
+async def stop_loss(user_id: int, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
+    """
+    Para a execução do ‘cluster’ para um determinado usuário, se ele estiver em execução.
+
+    Args:
+        user_id (int): ID do usuário para o qual o ‘cluster’ deve ser interrompido.
+
+    Returns:
+        dict: dicionário contendo uma mensagem informando se o bot já estava parado ou se o bot foi parado com sucesso.
+    """
+    # Verifica se o bot já está parado.
+    status_bot = await api.get_status_bot(user_id)
+    if status_bot in [0, 2, 3]:
+        return {'message': 'App ja parado!'}
+    # Procura pelo contêiner do cluster e o para.
+    containers = client.containers.list(all=True)
+    for container in containers:
+        if container.name == f'bot_{user_id}':
+            await api.set_status_bot(user_id, 3)
+            container.stop()
+            return {'message': 'App Parado por stop loss!'}
+    return {'message': 'Erro ao parar o App'}
+
+
+@app.get("/stop_win/{user_id}")
+async def stop_win(user_id: int, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
+    """
+    Para a execução do ‘cluster’ para um determinado usuário, se ele estiver em execução.
+
+    Args:
+        user_id (int): ID do usuário para o qual o ‘cluster’ deve ser interrompido.
+
+    Returns:
+        dict: dicionário contendo uma mensagem informando se o bot já estava parado ou se o bot foi parado com sucesso.
+    """
+    # Verifica se o bot já está parado.
+    status_bot = await api.get_status_bot(user_id)
+    if status_bot in [0, 2, 3]:
+        return {'message': 'App ja parado!'}
+    # Procura pelo contêiner do cluster e o para.
+    containers = client.containers.list(all=True)
+    for container in containers:
+        if container.name == f'bot_{user_id}':
+            await api.set_status_bot(user_id, 2)
+            container.stop()
+            return {'message': 'App Parado por stop win!'}
+    return {'message': 'Erro ao parar o App'}
