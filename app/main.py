@@ -80,10 +80,12 @@ async def get_candles(pair: str):
 
 async def digital_check_win(check_id: int):
     print('Verificando resultado da negociação Digital: ', check_id)
-    while True:
-        check_status, win = instance.check_win_digital_v2(check_id)
-        if check_status is True:
-            break
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        while True:
+            loop = asyncio.get_running_loop()
+            check_status, win = await loop.run_in_executor(executor, instance.check_win_digital_v2, check_id)
+            if check_status is True:
+                break
     if win < 0:
         print("you loss "+str(win)+"$")
         balance = instance.get_balance()
@@ -100,12 +102,14 @@ async def digital_check_win(check_id: int):
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
 
 
-async def binary_check_win(check_id: int, balance: float):
+async def binary_check_win(check_id: int):
     print('Verificando resultado da negociação Binária: ', check_id)
-    while True:
-        check_status, win = instance.check_win_v4(check_id)
-        if check_status is True:
-            break
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        while True:
+            loop = asyncio.get_running_loop()
+            check_status, win = await loop.run_in_executor(executor, instance.check_win_v4, check_id)
+            if check_status is True:
+                break
     if win == 'loose':
         print("you loss "+str(win)+"$")
         value_loss = await api.get_management_values(user_id)['value_loss']
