@@ -79,20 +79,27 @@ async def get_candles(pair: str):
     return candles
 
 
-def check_win_digital_process(check_id):
-    print('Verificando resultado da negociação Digital: ', check_id)
+def check_win_digital_process(check_id, queue):
     while True:
         check_status, win = instance.check_win_digital_v2(check_id)
         if check_status is True:
-            return win
+            queue.put(win)
+            break
 
 
 async def digital_check_win(check_id: int):
-    print('Iniciando verificação do resultado da negociação Digital: ', check_id)
+    print('Verificando resultado da negociação Digital: ', check_id)
+
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        win = await asyncio.get_running_loop().run_in_executor(executor, check_win_digital_process, check_id)
-    print('Resultado da negociação Digital: ', win)
-    balance = instance.get_balance()
+        queue = multiprocessing.Manager().Queue()
+        executor.submit(check_win_digital_process, check_id, queue)
+
+    while True:
+        if not queue.empty():
+            win = queue.get()
+            break
+        else:
+            await asyncio.sleep(0.1)
     if win < 0:
         print("you loss " + str(win) + "$")
         value_loss = await api.get_management_values(user_id)['value_loss']
