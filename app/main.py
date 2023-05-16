@@ -107,19 +107,28 @@ async def digital_check_win(check_id: int):
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
 
 
-def check_win_process(check_id):
-    print('Verificando resultado da negociação Binária: ', check_id)
+def check_win_process(check_id, queue):
     while True:
         check_status, win = instance.check_win_v4(check_id)
         if check_status is True:
-            return win
+            queue.put(win)
+            break
 
 
 async def binary_check_win(check_id: int):
-    print('Iniciando verificação do resultado da negociação Binária: ', check_id)
+    print('Verificando resultado da negociação Binária: ', check_id)
+
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        win = await asyncio.get_running_loop().run_in_executor(executor, check_win_process, check_id)
-    print('Resultado da negociação Binária: ', win)
+        queue = multiprocessing.Manager().Queue()
+        executor.submit(check_win_process, check_id, queue)
+
+    while True:
+        if not queue.empty():
+            win = queue.get()
+            break
+        else:
+            await asyncio.sleep(0.1)
+
     if win == 'loose':
         print("you loss " + str(win) + "$")
         value_loss = await api.get_management_values(user_id)['value_loss']
