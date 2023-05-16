@@ -79,47 +79,28 @@ async def get_candles(pair: str):
     return candles
 
 
-def check_win_digital_process(check_id, queue):
-    while True:
-        check_status, win = instance.check_win_digital_v2(check_id)
-        if check_status is True:
-            queue.put(win)
-            break
-
-
 async def digital_check_win(check_id: int):
     print('Verificando resultado da negociação Digital: ', check_id)
-
-    with concurrent.futures.ProcessPoolExecutor() as executor:
-        queue = multiprocessing.Manager().Queue()
-        executor.submit(check_win_digital_process, check_id, queue)
-
     while True:
-        if not queue.empty():
-            win = queue.get()
-            break
-        else:
-            await asyncio.sleep(0.1)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            loop = asyncio.get_running_loop()
+            check_status, win = await loop.run_in_executor(executor, instance.check_win_digital_v2, check_id)
+            if check_status is True:
+                break
     if win < 0:
-        print("you loss " + str(win) + "$")
+        print("you loss "+str(win)+"$")
+        balance = instance.get_balance()
         value_loss = await api.get_management_values(user_id)['value_loss']
         new_balance = balance - value_loss
-        new_value_loss = value_loss + win
+        new_value_loss = value_loss+win
         await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
     else:
-        print("you win " + str(win) + "$")
+        print("you win "+str(win)+"$")
+        balance = instance.get_balance()
         value_gain = await api.get_management_values(user_id)['value_gain']
         new_balance = balance + value_gain
-        new_value_gain = value_gain + win
+        new_value_gain = value_gain+win
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
-
-
-def check_win_process(check_id, queue):
-    while True:
-        check_status, win = instance.check_win_v4(check_id)
-        if check_status is True:
-            queue.put(win)
-            break
 
 
 async def binary_check_win(check_id: int):
