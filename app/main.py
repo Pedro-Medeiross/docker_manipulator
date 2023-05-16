@@ -79,27 +79,30 @@ async def get_candles(pair: str):
     return candles
 
 
+def check_win_digital_process(check_id):
+    while True:
+        check_status, win = instance.check_win_digital_v2(check_id)
+        if check_status is True:
+            return win
+
+
 async def digital_check_win(check_id: int):
     print('Verificando resultado da negociação Digital: ', check_id)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        while True:
-            loop = asyncio.get_running_loop()
-            check_status, win = await loop.run_in_executor(executor, instance.check_win_digital_v2, check_id)
-            if check_status is True:
-                break
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        win = await asyncio.get_running_loop().run_in_executor(executor, check_win_digital_process, check_id)
+
+    balance = instance.get_balance()
     if win < 0:
-        print("you loss "+str(win)+"$")
-        balance = instance.get_balance()
+        print("you loss " + str(win) + "$")
         value_loss = await api.get_management_values(user_id)['value_loss']
         new_balance = balance - value_loss
-        new_value_loss = value_loss+win
+        new_value_loss = value_loss + win
         await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
     else:
-        print("you win "+str(win)+"$")
-        balance = instance.get_balance()
+        print("you win " + str(win) + "$")
         value_gain = await api.get_management_values(user_id)['value_gain']
         new_balance = balance + value_gain
-        new_value_gain = value_gain+win
+        new_value_gain = value_gain + win
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
 
 
@@ -246,10 +249,10 @@ async def buy_trade(trade_info_id: int):
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
                 num1 = (float(price) / 100000) * 5
-                num2 = (float(price) / 100000) * 3
                 zone1 = float(price)
-                zone2 = float(price) + num1
-                if float(actual_candle) >= zone1 and float(actual_candle) <= zone2 or float(actual_candle) == float(price):
+                zone2 = zone1 + num1
+                if zone1 <= float(actual_candle) <= zone2:
+                    print("A vela atual está na zona verde.")
                     print(f'Vela igual ao preço: {candle} = {price}')
                     if news_status:
                         values = await(api.get_news_filter())
@@ -322,11 +325,11 @@ async def buy_trade(trade_info_id: int):
                                     await asyncio.gather(*check_win)
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
-                num1 = (float(price) / 100000) * 3
-                num2 = (float(price) / 100000) * 5
-                zone1 = float(price) - num2
+                num1 = (float(price) / 100000) * 5
                 zone2 = float(price)
-                if float(actual_candle) >= zone1 and float(actual_candle) <= zone2 or float(actual_candle) == float(price):
+                zone1 = zone2 - num1
+                if zone1 <= float(actual_candle) <= zone2:
+                    print("A vela atual está na zona vermelha.")
                     print(f'Vela igual ao preço: {candle} = {price}')
                     if news_status:
                         values = await(api.get_news_filter())
@@ -475,10 +478,10 @@ async def buy_trade(trade_info_id: int):
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
                 num1 = (float(price) / 100000) * 5
-                num2 = (float(price) / 100000) * 3
                 zone1 = float(price)
-                zone2 = float(price) + num1
-                if float(actual_candle) >= zone1 and float(actual_candle) <= zone2 or float(actual_candle) == float(price):
+                zone2 = zone1 + num1
+                if zone1 <= float(actual_candle) <= zone2:
+                    print("A vela atual está na zona verde.")
                     print(f'Vela igual ao preço: {candle} = {price}')
                     if news_status:
                         values = await(api.get_news_filter())
@@ -551,11 +554,11 @@ async def buy_trade(trade_info_id: int):
                                     await asyncio.gather(*check_win)
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
-                num1 = (float(price) / 100000) * 3
-                num2 = (float(price) / 100000) * 5
-                zone1 = float(price) - num2
+                num1 = (float(price) / 100000) * 5
                 zone2 = float(price)
-                if float(actual_candle) >= zone1 and float(actual_candle) <= zone2 or float(actual_candle) == float(price):
+                zone1 = zone2 - num1
+                if zone1 <= float(actual_candle) <= zone2:
+                    print("A vela atual está na zona vermelha.")
                     print(f'Vela igual ao preço: {candle} = {price}')
                     if news_status:
                         values = await(api.get_news_filter())
