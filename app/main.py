@@ -87,14 +87,14 @@ def check_win_digital_process(check_id):
     if win < 0:
         print("you loss " + str(win) + "$")
         actual_balance = instance.get_balance()
-        value_loss = await api.get_management_values(user_id)['value_loss']
+        value_loss = asyncio.run(api.get_management_values(user_id)['value_loss'])
         new_balance = actual_balance - value_loss
         new_value_loss = value_loss + win
         await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
     else:
         print("you win " + str(win) + "$")
         actual_balance = instance.get_balance()
-        value_gain = await api.get_management_values(user_id)['value_gain']
+        value_gain = asyncio.run(api.get_management_values(user_id)['value_gain'])
         new_balance = actual_balance + value_gain
         new_value_gain = value_gain + win
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
@@ -114,14 +114,14 @@ def check_win_process(check_id):
     if win == 'loose':
         print("you loss " + str(win) + "$")
         actual_balance = instance.get_balance()
-        value_loss = await api.get_management_values(user_id)['value_loss']
+        value_loss = asyncio.run(api.get_management_values(user_id)['value_loss'])
         new_balance = actual_balance - value_loss
         new_value_loss = value_loss + win
         await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
     if win == 'win':
         print("you win " + str(win) + "$")
         actual_balance = instance.get_balance()
-        value_gain = await api.get_management_values(user_id)['value_gain']
+        value_gain = asyncio.run(api.get_management_values(user_id)['value_gain'])
         new_balance = actual_balance + value_gain
         new_value_gain = value_gain + win
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
