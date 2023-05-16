@@ -2,9 +2,10 @@ import os
 import time
 import pytz
 import api
-from iqoption import IqOption
 import asyncio
 import concurrent.futures
+import multiprocessing
+from iqoption import IqOption
 
 print('Iniciando bot...')
 # Pares que serão monitorados
@@ -102,25 +103,29 @@ async def digital_check_win(check_id: int):
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
 
 
+def check_win_process(check_id):
+    while True:
+        check_status, win = instance.check_win_v4(check_id)
+        if check_status is True:
+            return win
+
+
 async def binary_check_win(check_id: int):
     print('Verificando resultado da negociação Binária: ', check_id)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        while True:
-            loop = asyncio.get_running_loop()
-            check_status, win = await loop.run_in_executor(executor, instance.check_win_v4, check_id)
-            if check_status is True:
-                break
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        win = await asyncio.get_running_loop().run_in_executor(executor, check_win_process, check_id)
+
     if win == 'loose':
-        print("you loss "+str(win)+"$")
+        print("you loss " + str(win) + "$")
         value_loss = await api.get_management_values(user_id)['value_loss']
         new_balance = balance - value_loss
-        new_value_loss = value_loss+win
+        new_value_loss = value_loss + win
         await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
     if win == 'win':
-        print("you win "+str(win)+"$")
+        print("you win " + str(win) + "$")
         value_gain = await api.get_management_values(user_id)['value_gain']
         new_balance = balance + value_gain
-        new_value_gain = value_gain+win
+        new_value_gain = value_gain + win
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
 
 
