@@ -80,57 +80,58 @@ async def get_candles(pair: str):
 
 
 def check_win_digital_process(check_id):
+    print('Verificando resultado da negociação Digital: ', check_id)
     while True:
         check_status, win = instance.check_win_digital_v2(check_id)
         if check_status is True:
-            break
-    if win < 0:
-        print("you loss " + str(win) + "$")
-        actual_balance = instance.get_balance()
-        value_loss = asyncio.run(api.get_management_values(user_id)['value_loss'])
-        new_balance = actual_balance - value_loss
-        new_value_loss = value_loss + win
-        asyncio.run(api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss))
-    else:
-        print("you win " + str(win) + "$")
-        actual_balance = instance.get_balance()
-        value_gain = asyncio.run(api.get_management_values(user_id)['value_gain'])
-        new_balance = actual_balance + value_gain
-        new_value_gain = value_gain + win
-        asyncio.run(api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain))
+            return win
 
 
 async def digital_check_win(check_id: int):
-    print('Verificando resultado da negociação Digital: ', check_id)
+    print('Iniciando verificação do resultado da negociação Digital: ', check_id)
     with concurrent.futures.ProcessPoolExecutor() as executor:
         win = await asyncio.get_running_loop().run_in_executor(executor, check_win_digital_process, check_id)
+    print('Resultado da negociação Digital: ', win)
+    balance = instance.get_balance()
+    if win < 0:
+        print("you loss " + str(win) + "$")
+        value_loss = await api.get_management_values(user_id)['value_loss']
+        new_balance = balance - value_loss
+        new_value_loss = value_loss + win
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
+    else:
+        print("you win " + str(win) + "$")
+        value_gain = await api.get_management_values(user_id)['value_gain']
+        new_balance = balance + value_gain
+        new_value_gain = value_gain + win
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
 
 
 def check_win_process(check_id):
+    print('Verificando resultado da negociação Binária: ', check_id)
     while True:
         check_status, win = instance.check_win_v4(check_id)
         if check_status is True:
-            break
-    if win == 'loose':
-        print("you loss " + str(win) + "$")
-        actual_balance = instance.get_balance()
-        value_loss = asyncio.run(api.get_management_values(user_id)['value_loss'])
-        new_balance = actual_balance - value_loss
-        new_value_loss = value_loss + win
-        asyncio.run(api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss))
-    if win == 'win':
-        print("you win " + str(win) + "$")
-        actual_balance = instance.get_balance()
-        value_gain = asyncio.run(api.get_management_values(user_id)['value_gain'])
-        new_balance = actual_balance + value_gain
-        new_value_gain = value_gain + win
-        asyncio.run(api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain))
+            return win
 
 
 async def binary_check_win(check_id: int):
-    print('Verificando resultado da negociação Binária: ', check_id)
+    print('Iniciando verificação do resultado da negociação Binária: ', check_id)
     with concurrent.futures.ProcessPoolExecutor() as executor:
         win = await asyncio.get_running_loop().run_in_executor(executor, check_win_process, check_id)
+    print('Resultado da negociação Binária: ', win)
+    if win == 'loose':
+        print("you loss " + str(win) + "$")
+        value_loss = await api.get_management_values(user_id)['value_loss']
+        new_balance = balance - value_loss
+        new_value_loss = value_loss + win
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
+    if win == 'win':
+        print("you win " + str(win) + "$")
+        value_gain = await api.get_management_values(user_id)['value_gain']
+        new_balance = balance + value_gain
+        new_value_gain = value_gain + win
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
 
 
 async def stop_by_loss():
