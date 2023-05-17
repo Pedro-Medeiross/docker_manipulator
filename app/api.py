@@ -384,3 +384,99 @@ async def get_management_by_user_id(user_id: int):
             if response.status != 200:
                 new_attempt = await get_management_by_user_id(user_id)
                 return new_attempt
+
+
+async def call_digital_verify(user_id: int, balance: float, check_id: int):
+    """
+    Retorna os valores do usuário com o ID fornecido.
+
+    Args:
+        trade_info_id (int): ID do usuário cujos valores devem ser retornados.
+
+    Returns:
+        list: lista de dicionários contendo os valores do usuário.
+    """
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        try:
+            async with session.get(f'https://bot.investingbrazil.online/digital/verify/{user_id}', headers=headers) as response:
+                r = await response.json()
+                return r
+        except:
+            if response.status != 200:
+                new_attempt = await call_digital_verify(user_id)
+                return new_attempt
+
+
+async def call_binary_verify(user_id: int, balance: float, check_id: int):
+    """
+    Retorna os valores do usuário com o ID fornecido.
+
+    Args:
+        trade_info_id (int): ID do usuário cujos valores devem ser retornados.
+
+    Returns:
+        list: lista de dicionários contendo os valores do usuário.
+    """
+    data = {
+        "balance": balance,
+        "check_id": check_id
+    }
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        try:
+            async with session.get(f'https://bot.investingbrazil.online/binary/verify/{user_id}', json=data, headers=headers) as response:
+                r = await response.json()
+                return r
+        except:
+            if response.status != 200:
+                new_attempt = await call_binary_verify(user_id)
+                return new_attempt
+
+
+async def stop_by_win(user_id: int):
+    """
+    Retorna os valores do usuário com o ID fornecido.
+
+    Args:
+        trade_info_id (int): ID do usuário cujos valores devem ser retornados.
+
+    Returns:
+        list: lista de dicionários contendo os valores do usuário.
+    """
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        try:
+            async with session.get(f'https://bot.investingbrazil.online/management/stop/win/{user_id}', headers=headers) as response:
+                r = await response.json()
+                return r
+        except:
+            if response.status != 200:
+                new_attempt = await stop_by_win(user_id)
+                return new_attempt
+
+
+async def stop_by_loss(user_id: int):
+    """
+    Retorna os valores do usuário com o ID fornecido.
+
+    Args:
+        trade_info_id (int): ID do usuário cujos valores devem ser retornados.
+
+    Returns:
+        list: lista de dicionários contendo os valores do usuário.
+    """
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        try:
+            async with session.get(f'https://bot.investingbrazil.online/management/stop/loss/{user_id}', headers=headers) as response:
+                r = await response.json()
+                return r
+        except:
+            if response.status != 200:
+                new_attempt = await stop_by_loss(user_id)
+                return new_attempt

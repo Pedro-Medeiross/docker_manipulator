@@ -79,58 +79,6 @@ async def get_candles(pair: str):
     return candles
 
 
-async def digital_check_win(check_id: int):
-    print('Verificando resultado da negociação Digital: ', check_id)
-    while True:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            loop = asyncio.get_running_loop()
-            check_status, win = await loop.run_in_executor(executor, instance.check_win_digital_v2, check_id)
-            if check_status is True:
-                break
-    if win < 0:
-        print("you loss "+str(win)+"$")
-        balance = instance.get_balance()
-        value_loss = await api.get_management_values(user_id)['value_loss']
-        new_balance = balance - value_loss
-        new_value_loss = value_loss+win
-        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
-    else:
-        print("you win "+str(win)+"$")
-        balance = instance.get_balance()
-        value_gain = await api.get_management_values(user_id)['value_gain']
-        new_balance = balance + value_gain
-        new_value_gain = value_gain+win
-        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
-
-
-async def binary_check_win(check_id: int):
-    print('Verificando resultado da negociação Binária: ', check_id)
-
-    with concurrent.futures.ProcessPoolExecutor() as executor:
-        queue = multiprocessing.Manager().Queue()
-        executor.submit(check_win_process, check_id, queue)
-
-    while True:
-        if not queue.empty():
-            win = queue.get()
-            break
-        else:
-            await asyncio.sleep(0.1)
-
-    if win == 'loose':
-        print("you loss " + str(win) + "$")
-        value_loss = await api.get_management_values(user_id)['value_loss']
-        new_balance = balance - value_loss
-        new_value_loss = value_loss + win
-        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
-    if win == 'win':
-        print("you win " + str(win) + "$")
-        value_gain = await api.get_management_values(user_id)['value_gain']
-        new_balance = balance + value_gain
-        new_value_gain = value_gain + win
-        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
-
-
 async def stop_by_loss():
     print('Verificando se o bot deve ser parado por perda...')
     management_values = await(api.get_management_by_user_id(user_id))
@@ -150,6 +98,40 @@ async def stop_by_win():
         print('Parando bot por ganho...')
         await(api.set_status_bot(user_id, 3))
 
+
+async def digital_check_win(check_id: int, balance: float):
+    await api.call_digital_verify(user_id=user_id, check_id=check_id, balance=balance)
+    print('Verificando se o bot deve ser parado por ganho ou perda...')
+    values = await(api.get_management_values(user_id))
+    stop_win = values['stop_win']
+    stop_loss = values['stop_loss']
+    value_win = values['value_win']
+    value_loss = values['value_loss']
+    if value_win >= stop_win:
+        print('Parando bot por ganho...')
+        await(api.set_status_bot(user_id, 2))
+        await(api.stop_by_win(user_id))
+    elif value_loss >= stop_loss:
+        print('Parando bot por perda...')
+        await(api.set_status_bot(user_id, 3))
+        await(api.stop_by_loss(user_id))
+
+async def binary_check_win(check_id: int, balance: float):
+    await api.call_binary_verify(user_id=user_id, check_id=check_id, balance=balance)
+    print('Verificando se o bot deve ser parado por ganho ou perda...')
+    values = await(api.get_management_values(user_id))
+    stop_win = values['stop_win']
+    stop_loss = values['stop_loss']
+    value_win = values['value_win']
+    value_loss = values['value_loss']
+    if value_win >= stop_win:
+        print('Parando bot por ganho...')
+        await(api.set_status_bot(user_id, 2))
+        await(api.stop_by_win(user_id))
+    elif value_loss >= stop_loss:
+        print('Parando bot por perda...')
+        await(api.set_status_bot(user_id, 3))
+        await(api.stop_by_loss(user_id))
 
 async def buy_trade(trade_info_id: int):
     print('Iniciando negociação: ', trade_info_id)
@@ -191,7 +173,8 @@ async def buy_trade(trade_info_id: int):
                             check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
                             check_win = []
-                            future = asyncio.ensure_future(digital_check_win(id))
+                            balance1 = instance.get_balance()
+                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -268,7 +251,8 @@ async def buy_trade(trade_info_id: int):
                             check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
                             check_win = []
-                            future = asyncio.ensure_future(digital_check_win(id))
+                            balance1 = instance.get_balance()
+                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -345,7 +329,8 @@ async def buy_trade(trade_info_id: int):
                             check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
                             check_win = []
-                            future = asyncio.ensure_future(digital_check_win(id))
+                            balance1 = instance.get_balance()
+                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -420,7 +405,8 @@ async def buy_trade(trade_info_id: int):
                             check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
                             check_win = []
-                            future = asyncio.ensure_future(digital_check_win(id))
+                            balance1 = instance.get_balance()
+                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -497,7 +483,8 @@ async def buy_trade(trade_info_id: int):
                             check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
                             check_win = []
-                            future = asyncio.ensure_future(digital_check_win(id))
+                            balance1 = instance.get_balance()
+                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -574,7 +561,8 @@ async def buy_trade(trade_info_id: int):
                             check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
                                                       duration=int(time_frame))
                             check_win = []
-                            future = asyncio.ensure_future(digital_check_win(id))
+                            balance1 = instance.get_balance()
+                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))

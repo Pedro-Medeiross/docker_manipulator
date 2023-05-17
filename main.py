@@ -1,12 +1,14 @@
 import asyncio
 import os
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+import secrets
 import docker
 import api
-import secrets
+import uuid
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from fastapi import Depends, HTTPException, status
+from pydantic import BaseModel
 
 app = FastAPI()
 security = HTTPBasic()
@@ -44,6 +46,8 @@ if 'docker_bot:latest' not in [image.tags[0] for image in images]:
     print('Image not found, building new image, this may take a while...')
     print('Please wait...')
     client.images.build(path='.', dockerfile='./Dockerfile', tag='docker_bot:latest')
+    client.images.build(path='.', dockerfile='./binary.dockerfile', tag='binary_verifier:latest')
+    client.images.build(path='.', dockerfile='./digital.dockerfile', tag='digital_verifier:latest')
     print('Image built successfully')
 else:
     print('Image found, skipping build')
@@ -228,3 +232,98 @@ async def restart_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(
             container.restart()
             return {'message': 'App reiniciado!'}
     return {'message': 'Erro ao reiniciar o App'}
+
+
+@app.get("/stop/win/{user_id}")
+async def stop_win(user_id: int, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
+    """
+    Para a execução do ‘cluster’ para um determinado usuário, se ele estiver em execução.
+
+    Args:
+        user_id (int): ID do usuário para o qual o ‘cluster’ deve ser interrompido.
+
+    Returns:
+        dict: dicionário contendo uma mensagem informando se o bot já estava parado ou se o bot foi parado com sucesso.
+    """
+    # Verifica se o bot já está parado.
+    status_bot = await api.get_status_bot(user_id)
+    if status_bot in [0, 2, 3]:
+        return {'message': 'App ja parado!'}
+    # Procura pelo contêiner do cluster e o para.
+    containers = client.containers.list(all=True)
+    for container in containers:
+        if container.name == f'bot_{user_id}':
+            await api.set_status_bot(user_id, 2)
+            container.stop()
+            return {'message': 'App Parado por stop win!'}
+    return {'message': 'Erro ao parar o App'}
+
+
+@app.get("/stop/loss/{user_id}")
+async def stop_loss(user_id: int, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
+    """
+    Para a execução do ‘cluster’ para um determinado usuário, se ele estiver em execução.
+
+    Args:
+        user_id (int): ID do usuário para o qual o ‘cluster’ deve ser interrompido.
+
+    Returns:
+        dict: dicionário contendo uma mensagem informando se o bot já estava parado ou se o bot foi parado com sucesso.
+    """
+    # Verifica se o bot já está parado.
+    status_bot = await api.get_status_bot(user_id)
+    if status_bot in [0, 2, 3]:
+        return {'message': 'App ja parado!'}
+    # Procura pelo contêiner do cluster e o para.
+    containers = client.containers.list(all=True)
+    for container in containers:
+        if container.name == f'bot_{user_id}':
+            await api.set_status_bot(user_id, 3)
+            container.stop()
+            return {'message': 'App Parado por stop loss!'}
+    return {'message': 'Erro ao parar o App'}
+
+
+class BinaryVerify(BaseModel):
+    balance: float
+    check_id: int
+
+
+@app.get("/binary/verify/{user_id}")
+async def binary_verify(user_id: int, values_verify: BinaryVerify, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
+    env_vars = {
+        'BALANCE': values_verify.balance,
+        'CHECK_ID': values_verify.check_id,
+        'USER_ID': user_id
+    }
+    # Verifica se o bot já está parado.
+    for container in client.containers.list(all=True):
+        if container.name in [f'binary_verify_{user_id}'] and container.status == 'exited':
+            container.delete()
+    status_bot = await api.get_status_bot(user_id)
+    if status_bot in [0, 2, 3]:
+        return {'message': 'App ja parado!'}
+    if status_bot == 1:
+        extra_id = uuid.uuid4()
+        client.containers.create(image='binary_verifier', environment=env_vars, name=f'binary_verify_{user_id}_{extra_id}')
+        client.containers.get(f'binary_verify_{user_id}_{extra_id}').start()
+
+
+@app.get("/digital/verify/{user_id}")
+async def digital_verify(user_id: int, values_verify: BinaryVerify, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
+    env_vars = {
+        'BALANCE': values_verify.balance,
+        'CHECK_ID': values_verify.check_id,
+        'USER_ID': user_id
+    }
+    # Verifica se o bot já está parado.
+    for container in client.containers.list(all=True):
+        if container.name in [f'digital_verify_{user_id}'] and container.status == 'exited':
+            container.delete()
+    status_bot = await api.get_status_bot(user_id)
+    if status_bot in [0, 2, 3]:
+        return {'message': 'App ja parado!'}
+    if status_bot == 1:
+        extra_id = uuid.uuid4()
+        client.containers.create(image='digital_verifier', environment=env_vars, name=f'digital_verify_{user_id}_{extra_id}')
+        client.containers.get(f'digital_verify_{user_id}_{extra_id}').start()
