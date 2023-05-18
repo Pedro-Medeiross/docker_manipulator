@@ -94,7 +94,7 @@ async def stop_by_win():
     management_values = await(api.get_management_values(user_id))
     stop_win = management_values['stop_win']
     value_gain = management_values['value_gain']
-    if value_gain['value_win'] >= stop_win:
+    if value_gain['value_gain'] >= stop_win:
         print('Parando bot por ganho...')
         await(api.set_status_bot(user_id, 3))
 
@@ -105,7 +105,7 @@ async def digital_check_win(check_id: int, balance: float):
     values = await(api.get_management_values(user_id))
     stop_win = values['stop_win']
     stop_loss = values['stop_loss']
-    value_win = values['value_win']
+    value_win = values['value_gain']
     value_loss = values['value_loss']
     if value_win >= stop_win:
         print('Parando bot por ganho...')
@@ -122,7 +122,7 @@ async def binary_check_win(check_id: int, balance: float):
     values = await(api.get_management_values(user_id))
     stop_win = values['stop_win']
     stop_loss = values['stop_loss']
-    value_win = values['value_win']
+    value_win = values['value_gain']
     value_loss = values['value_loss']
     if value_win >= stop_win:
         print('Parando bot por ganho...')
