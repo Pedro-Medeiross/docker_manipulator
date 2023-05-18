@@ -304,7 +304,7 @@ async def get_management_values(user_id: int):
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.get(f'https://v1.investingbrazil.online/management/values/{user_id}', headers=headers) as response:
+            async with session.get(f'https://v1.investingbrazil.online/management/{user_id}', headers=headers) as response:
                 r = await response.json()
                 return r
         except:
@@ -480,3 +480,5 @@ async def stop_by_loss(user_id: int):
             if response.status != 200:
                 new_attempt = await stop_by_loss(user_id)
                 return new_attempt
+
+
