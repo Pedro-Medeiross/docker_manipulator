@@ -396,11 +396,15 @@ async def call_digital_verify(user_id: int, balance: float, check_id: int):
     Returns:
         list: lista de dicionários contendo os valores do usuário.
     """
+    data = {
+            "balance": balance,
+            "check_id": check_id
+        }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.get(f'https://bot.investingbrazil.online/digital/verify/{user_id}', headers=headers) as response:
+            async with session.get(f'https://bot.investingbrazil.online/digital/verify/{user_id}', json=data, headers=headers) as response:
                 r = await response.json()
                 return r
         except:
