@@ -312,9 +312,6 @@ async def get_management_values(user_id: int):
                 new_attempt = await get_management_values(user_id)
                 return new_attempt
 
-import asyncio
-a = asyncio.run(get_management_values(3))
-print(a)
 
 async def update_management_values_gain(user_id: int, balance: float, value_gain: float):
     """
