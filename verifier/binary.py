@@ -43,7 +43,10 @@ async def binary_check_win(check_id: int, iq, user_id: int, balance: float):
 
 
 if __name__ == "__main__":
-    iq = IQ_Option('login', 'password')
+    user_account = asyncio.run(api)
+    email = os.getenv('EMAIL')
+    password = os.getenv('PASSWORD')
+    iq = IQ_Option(email, password)
     iq.connect()
     check_id = int(os.getenv('CHECK_ID'))
     user_id = int(os.getenv('USER_ID'))

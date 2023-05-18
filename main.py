@@ -291,10 +291,14 @@ class BinaryVerify(BaseModel):
 
 @app.get("/binary/verify/{user_id}")
 async def binary_verify(user_id: int, values_verify: BinaryVerify, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
+    email = await api.get_user_iqoption_email(user_id)
+    password = await api.get_user_iqoption_password(user_id)
     env_vars = {
         'BALANCE': values_verify.balance,
         'CHECK_ID': values_verify.check_id,
-        'USER_ID': user_id
+        'USER_ID': user_id,
+        'EMAIL': email,
+        'PASSWORD': password
     }
     # Verifica se o bot já está parado.
     for container in client.containers.list(all=True):
@@ -312,10 +316,14 @@ async def binary_verify(user_id: int, values_verify: BinaryVerify, credentials: 
 
 @app.get("/digital/verify/{user_id}")
 async def digital_verify(user_id: int, values_verify: BinaryVerify, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
+    email = await api.get_user_iqoption_email(user_id)
+    password = await api.get_user_iqoption_password(user_id)
     env_vars = {
         'BALANCE': values_verify.balance,
         'CHECK_ID': values_verify.check_id,
-        'USER_ID': user_id
+        'USER_ID': user_id,
+        'EMAIL': email,
+        'PASSWORD': password
     }
     # Verifica se o bot já está parado.
     for container in client.containers.list(all=True):
