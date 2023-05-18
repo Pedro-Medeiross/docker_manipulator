@@ -385,6 +385,8 @@ async def get_management_by_user_id(user_id: int):
                 new_attempt = await get_management_by_user_id(user_id)
                 return new_attempt
 
+import asyncio
+
 
 async def call_digital_verify(user_id: int, balance: float, check_id: int):
     """

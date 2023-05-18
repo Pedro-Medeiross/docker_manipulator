@@ -81,7 +81,7 @@ async def get_candles(pair: str):
 
 async def stop_by_loss():
     print('Verificando se o bot deve ser parado por perda...')
-    management_values = await(api.get_management_by_user_id(user_id))
+    management_values = await(api.get_management_values(user_id))
     stop_loss = management_values['stop_loss']
     value_stop = management_values['value_stop']
     if value_stop['value_loss'] >= stop_loss:
@@ -102,7 +102,7 @@ async def stop_by_win():
 async def digital_check_win(check_id: int, balance: float):
     await api.call_digital_verify(user_id=user_id, check_id=check_id, balance=balance)
     print('Verificando se o bot deve ser parado por ganho ou perda...')
-    values = await(api.get_management_by_user_id(user_id))
+    values = await(api.get_management_values(user_id))
     stop_win = values['stop_win']
     stop_loss = values['stop_loss']
     value_win = values['value_win']
