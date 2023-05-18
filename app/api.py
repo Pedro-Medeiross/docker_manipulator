@@ -410,6 +410,7 @@ async def call_digital_verify(user_id: int, balance: float, check_id: int):
 
 
 async def call_binary_verify(user_id: int, balance: float, check_id: int):
+    print('call_binary_verify')
     """
     Retorna os valores do usuário com o ID fornecido.
 
@@ -429,7 +430,7 @@ async def call_binary_verify(user_id: int, balance: float, check_id: int):
         try:
             async with session.get(f'https://bot.investingbrazil.online/binary/verify/{user_id}', json=data, headers=headers) as response:
                 r = await response.json()
-                return r
+                print(r)
         except:
             if response.status != 200:
                 new_attempt = await call_binary_verify(user_id)

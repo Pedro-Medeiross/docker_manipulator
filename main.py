@@ -307,6 +307,7 @@ async def binary_verify(user_id: int, values_verify: BinaryVerify, credentials: 
         extra_id = uuid.uuid4()
         client.containers.create(image='binary_verifier', environment=env_vars, name=f'binary_verify_{user_id}_{extra_id}')
         client.containers.get(f'binary_verify_{user_id}_{extra_id}').start()
+        return {'message': 'Verificação iniciada!'}
 
 
 @app.get("/digital/verify/{user_id}")
