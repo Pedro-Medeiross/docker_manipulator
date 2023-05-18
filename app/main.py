@@ -308,7 +308,7 @@ async def buy_trade(trade_info_id: int):
                                     await asyncio.gather(*check_win)
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
-                num1 = (float(price) / 100000) * 4
+                num1 = (float(price) / 100000) * 3.75
                 zone2 = float(price)
                 zone1 = zone2 - num1
                 if zone1 <= float(actual_candle) <= zone2:
