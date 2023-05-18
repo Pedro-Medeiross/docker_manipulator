@@ -16,9 +16,8 @@ def check_win_digital_process(check_id, iq):
 async def digital_check_win(check_id: int, iq, user_id: int, balance: float):
     print('Iniciando verificação do resultado da negociação Digital: ', check_id)
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        win = await asyncio.get_running_loop().run_in_executor(executor, check_win_digital_process, check_id)
+        win = await asyncio.get_running_loop().run_in_executor(executor, check_win_digital_process, check_id, iq)
     print('Resultado da negociação Digital: ', win)
-    balance = iq.get_balance()
     if win < 0:
         print("you loss " + str(win) + "$")
         value_loss = await api.get_management_values(user_id)['value_loss']

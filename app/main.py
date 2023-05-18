@@ -230,7 +230,7 @@ async def buy_trade(trade_info_id: int):
                                     await asyncio.gather(*check_win)
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
-                num1 = (float(price) / 100000) * 4.5
+                num1 = (float(price) / 100000) * 4.25
                 zone1 = float(price)
                 zone2 = zone1 + num1
                 if zone1 <= float(actual_candle) <= zone2:
@@ -308,7 +308,7 @@ async def buy_trade(trade_info_id: int):
                                     await asyncio.gather(*check_win)
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
-                num1 = (float(price) / 100000) * 4.5
+                num1 = (float(price) / 100000) * 4.25
                 zone2 = float(price)
                 zone1 = zone2 - num1
                 if zone1 <= float(actual_candle) <= zone2:
@@ -462,7 +462,7 @@ async def buy_trade(trade_info_id: int):
                                     await asyncio.gather(*check_win)
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
-                num1 = (float(price) / 100000) * 4.5
+                num1 = (float(price) / 100000) * 4.25
                 zone1 = float(price)
                 zone2 = zone1 + num1
                 if zone1 <= float(actual_candle) <= zone2:
@@ -540,7 +540,7 @@ async def buy_trade(trade_info_id: int):
                                     await asyncio.gather(*check_win)
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
-                num1 = (float(price) / 100000) * 4.5
+                num1 = (float(price) / 100000) * 4.25
                 zone2 = float(price)
                 zone1 = zone2 - num1
                 if zone1 <= float(actual_candle) <= zone2:
