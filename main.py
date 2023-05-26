@@ -1,14 +1,11 @@
-import asyncio
 import os
 import secrets
 import docker
 import api
-import uuid
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from fastapi import Depends, HTTPException, status
-from pydantic import BaseModel
 
 app = FastAPI()
 security = HTTPBasic()
@@ -282,57 +279,3 @@ async def stop_loss(user_id: int, credentials: HTTPBasicCredentials = Depends(ge
             container.stop()
             return {'message': 'App Parado por stop loss!'}
     return {'message': 'Erro ao parar o App'}
-
-
-class BinaryVerify(BaseModel):
-    balance: float
-    check_id: int
-
-
-@app.get("/binary/verify/{user_id}")
-async def binary_verify(user_id: int, values_verify: BinaryVerify, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
-    email = await api.get_user_iqoption_email(user_id)
-    password = await api.get_user_iqoption_password(user_id)
-    env_vars = {
-        'BALANCE': values_verify.balance,
-        'CHECK_ID': values_verify.check_id,
-        'USER_ID': user_id,
-        'EMAIL': email,
-        'PASSWORD': password
-    }
-    # Verifica se o bot já está parado.
-    for container in client.containers.list(all=True):
-        if container.name in [f'binary_verify_{user_id}'] and container.status == 'exited':
-            container.delete()
-    status_bot = await api.get_status_bot(user_id)
-    if status_bot in [0, 2, 3]:
-        return {'message': 'App ja parado!'}
-    if status_bot == 1:
-        extra_id = uuid.uuid4()
-        client.containers.create(image='binary_verifier', environment=env_vars, name=f'binary_verify_{user_id}_{extra_id}')
-        client.containers.get(f'binary_verify_{user_id}_{extra_id}').start()
-        return {'message': 'Verificação iniciada!'}
-
-
-@app.get("/digital/verify/{user_id}")
-async def digital_verify(user_id: int, values_verify: BinaryVerify, credentials: HTTPBasicCredentials = Depends(get_basic_credentials)):
-    email = await api.get_user_iqoption_email(user_id)
-    password = await api.get_user_iqoption_password(user_id)
-    env_vars = {
-        'BALANCE': values_verify.balance,
-        'CHECK_ID': values_verify.check_id,
-        'USER_ID': user_id,
-        'EMAIL': email,
-        'PASSWORD': password
-    }
-    # Verifica se o bot já está parado.
-    for container in client.containers.list(all=True):
-        if container.name in [f'digital_verify_{user_id}'] and container.status == 'exited':
-            container.delete()
-    status_bot = await api.get_status_bot(user_id)
-    if status_bot in [0, 2, 3]:
-        return {'message': 'App ja parado!'}
-    if status_bot == 1:
-        extra_id = uuid.uuid4()
-        client.containers.create(image='digital_verifier', environment=env_vars, name=f'digital_verify_{user_id}_{extra_id}')
-        client.containers.get(f'digital_verify_{user_id}_{extra_id}').start()

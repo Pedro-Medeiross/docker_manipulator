@@ -100,38 +100,48 @@ async def stop_by_win():
 
 
 async def digital_check_win(check_id: int, balance: float):
-    await api.call_digital_verify(user_id=user_id, check_id=check_id, balance=balance)
-    print('Verificando se o bot deve ser parado por ganho ou perda...')
-    values = await(api.get_management_values(user_id))
-    stop_win = values['stop_win']
-    stop_loss = values['stop_loss']
-    value_win = values['value_gain']
-    value_loss = values['value_loss']
-    if value_win >= stop_win:
-        print('Parando bot por ganho...')
-        await(api.set_status_bot(user_id, 2))
-        await(api.stop_by_win(user_id))
-    elif value_loss >= stop_loss:
-        print('Parando bot por perda...')
-        await(api.set_status_bot(user_id, 3))
-        await(api.stop_by_loss(user_id))
+    while True:
+        print(f'checando digital win do id {check_id}')
+        check_status, win = instance.check_win_digital_v2(check_id)
+        if check_status:
+            break
+    if win < 0:
+        print("you loss " + str(win) + "$")
+        value_loss = api.get_management_values(user_id)['value_loss']
+        new_balance = balance - value_loss
+        new_value_loss = value_loss + win
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
+    else:
+        print("you win " + str(win) + "$")
+        value_gain = api.get_management_values(user_id)['value_gain']
+        new_balance = balance + value_gain
+        new_value_gain = value_gain + win
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
+    await stop_by_win()
+    await stop_by_loss()
+
 
 async def binary_check_win(check_id: int, balance: float):
-    await api.call_binary_verify(user_id=user_id, check_id=check_id, balance=balance)
-    print('Verificando se o bot deve ser parado por ganho ou perda...')
-    values = await(api.get_management_values(user_id))
-    stop_win = values['stop_win']
-    stop_loss = values['stop_loss']
-    value_win = values['value_gain']
-    value_loss = values['value_loss']
-    if value_win >= stop_win:
-        print('Parando bot por ganho...')
-        await(api.set_status_bot(user_id, 2))
-        await(api.stop_by_win(user_id))
-    elif value_loss >= stop_loss:
-        print('Parando bot por perda...')
-        await(api.set_status_bot(user_id, 3))
-        await(api.stop_by_loss(user_id))
+    while True:
+        print(f'checando binary win do id {check_id}')
+        check_status, win = instance.check_win_v4(check_id)
+        if check_status:
+            break
+    if win == 'loose':
+        print("you loss " + str(win) + "$")
+        value_loss = api.get_management_values(user_id)['value_loss']
+        new_balance = balance - value_loss
+        new_value_loss = value_loss + win
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
+    elif win == 'win':
+        print("you win " + str(win) + "$")
+        value_gain = api.get_management_values(user_id)['value_gain']
+        new_balance = balance + value_gain
+        new_value_gain = value_gain + win
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
+        await stop_by_win()
+        await stop_by_loss()
+
 
 async def buy_trade(trade_info_id: int):
     print('Iniciando negociação: ', trade_info_id)
