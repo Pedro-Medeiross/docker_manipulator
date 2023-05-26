@@ -43,8 +43,6 @@ if 'docker_bot:latest' not in [image.tags[0] for image in images]:
     print('Image not found, building new image, this may take a while...')
     print('Please wait...')
     client.images.build(path='.', dockerfile='./Dockerfile', tag='docker_bot:latest')
-    client.images.build(path='.', dockerfile='./binary.dockerfile', tag='binary_verifier:latest')
-    client.images.build(path='.', dockerfile='./digital.dockerfile', tag='digital_verifier:latest')
     print('Image built successfully')
 else:
     print('Image found, skipping build')
