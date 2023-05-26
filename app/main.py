@@ -113,7 +113,7 @@ async def get_value_loss(user_id):
 async def digital_check_win(check_id: int, balance: float):
     while True:
         print(f'checando digital win do id {check_id}')
-        check_status, win = await instance.check_win_digital_v2(check_id)
+        check_status, win = instance.check_win_digital_v2(check_id)
         print(f'digital {check_id}, status: {check_status}, win: {win}')
         await asyncio.sleep(1)
         if check_status:
@@ -139,7 +139,7 @@ async def digital_check_win(check_id: int, balance: float):
 async def binary_check_win(check_id: int, balance: float):
     while True:
         print(f'checando binary win do id {check_id}')
-        check_status, win = await instance.check_win_v4(check_id)
+        check_status, win = instance.check_win_v4(check_id)
         print(f'binary {check_id}, status: {check_status}, win: {win}')
         await asyncio.sleep(1)
         if check_status:
