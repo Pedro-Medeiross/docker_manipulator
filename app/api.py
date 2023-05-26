@@ -320,6 +320,7 @@ async def update_management_values_gain(user_id: int, balance: float, value_gain
     Args:
         trade_id = ID da trade cujo status do agendamento deve ser atualizado.
     """
+    print(f'atualizando ganho user: {user_id}, balance: {balance}, ganho: {value_gain}')
     json = {
         {
             "balance": balance,
@@ -345,6 +346,7 @@ async def update_management_values_loss(user_id: int, balance: float, value_loss
     Args:
         trade_id = ID da trade cujo status do agendamento deve ser atualizado.
     """
+    print(f'atualizando perca user: {user_id}, balance: {balance}, perca: {value_loss}')
     json = {
         {
             "balance": balance,
