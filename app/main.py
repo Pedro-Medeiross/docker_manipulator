@@ -126,7 +126,7 @@ async def digital_check_win(check_id: int, balance: float):
         value_loss = await get_value_loss(user_id)
         new_balance = balance - value_loss
         new_value_loss = value_loss + win
-        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=abs(new_value_loss))
         management = await api.get_management_status(user_id)
         if management:
             await stop_by_win()
@@ -136,7 +136,7 @@ async def digital_check_win(check_id: int, balance: float):
         value_gain = await get_value_gain(user_id)
         new_balance = balance + value_gain
         new_value_gain = value_gain + win
-        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=abs(new_value_gain))
         management = await api.get_management_status(user_id)
         if management:
             await stop_by_win()
@@ -156,7 +156,7 @@ async def binary_check_win(check_id: int, balance: float):
         value_loss = await get_value_loss(user_id)
         new_balance = balance - value_loss
         new_value_loss = value_loss + win
-        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=abs(new_value_loss))
         management = await api.get_management_status(user_id)
         if management:
             await stop_by_win()
@@ -166,7 +166,7 @@ async def binary_check_win(check_id: int, balance: float):
         value_gain = await get_value_gain(user_id)
         new_balance = balance + value_gain
         new_value_gain = value_gain + win
-        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=abs(new_value_gain))
         management = await api.get_management_status(user_id)
         if management:
             await stop_by_win()
