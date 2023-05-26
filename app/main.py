@@ -103,11 +103,13 @@ async def stop_by_win():
 
 
 async def get_value_gain(user_id):
-    return await api.get_management_values(user_id)['value_gain']
+    management_values = await api.get_management_values(user_id)
+    return management_values['value_gain']
 
 
 async def get_value_loss(user_id):
-    return await api.get_management_values(user_id)['value_loss']
+    management_values = await api.get_management_values(user_id)
+    return management_values['value_loss']
 
 
 async def digital_check_win(check_id: int, balance: float):
