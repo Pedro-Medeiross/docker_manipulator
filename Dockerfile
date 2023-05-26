@@ -7,7 +7,7 @@ WORKDIR /app
 COPY iqoptionapi /app/iqoptionapi
 
 RUN pip install websocket-client==0.56
-RUN pip install -e /app/iqoptionapi/iqoptionapi
+RUN pip install -e /app/iqoptionapi
 RUN pip install python-dotenv
 RUN pip install aiohttp
 RUN pip install pytz
