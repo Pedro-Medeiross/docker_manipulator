@@ -107,6 +107,7 @@ def digital_check_win(check_id: int, balance: float):
         print(f'checando digital win do id {check_id}')
         check_status, win = instance.check_win_digital_v2(check_id)
         print(f'digital {check_id}, status: {check_status}, win: {win}')
+        time.sleep(1)
         if check_status:
             break
     if win < 0:
@@ -130,6 +131,7 @@ def binary_check_win(check_id: int, balance: float):
         print(f'checando binary win do id {check_id}')
         check_status, win = instance.check_win_v4(check_id)
         print(f'binary {check_id}, status: {check_status}, win: {win}')
+        time.sleep(1)
         if check_status:
             break
     if win == 'loose':
