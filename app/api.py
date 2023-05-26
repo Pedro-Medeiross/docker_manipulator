@@ -59,7 +59,22 @@ async def get_news_status(user_id: int):
                 return news
         except:
             if response.status != 200:
-                new_attempt = await get_status_bot(user_id)
+                new_attempt = await get_news_status(user_id)
+                return new_attempt
+
+
+async def get_management_status(user_id: int):
+    async with aiohttp.ClientSession() as session:
+        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
+        headers = {'Authorization': auth.encode()}
+        try:
+            async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/{user_id}', headers=headers) as response:
+                r = await response.json()
+                management = r['management']
+                return management
+        except:
+            if response.status != 200:
+                new_attempt = await get_management_status(user_id)
                 return new_attempt
 
 
@@ -322,10 +337,8 @@ async def update_management_values_gain(user_id: int, balance: float, value_gain
     """
     print(f'atualizando ganho user: {user_id}, balance: {balance}, ganho: {value_gain}')
     json = {
-        {
             "balance": balance,
             "value_gain": value_gain
-        }
     }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
@@ -348,10 +361,8 @@ async def update_management_values_loss(user_id: int, balance: float, value_loss
     """
     print(f'atualizando perca user: {user_id}, balance: {balance}, perca: {value_loss}')
     json = {
-        {
             "balance": balance,
             "value_loss": value_loss
-        }
     }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))

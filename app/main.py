@@ -126,16 +126,20 @@ async def digital_check_win(check_id: int, balance: float):
         new_balance = balance - value_loss
         new_value_loss = value_loss + win
         await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
-        await stop_by_win()
-        await stop_by_loss()
+        management = await api.get_management_status(user_id)
+        if management:
+            await stop_by_win()
+            await stop_by_loss()
     else:
         print("you win " + str(win) + "$")
         value_gain = await get_value_gain(user_id)
         new_balance = balance + value_gain
         new_value_gain = value_gain + win
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
-        await stop_by_win()
-        await stop_by_loss()
+        management = await api.get_management_status(user_id)
+        if management:
+            await stop_by_win()
+            await stop_by_loss()
 
 
 async def binary_check_win(check_id: int, balance: float):
@@ -152,16 +156,20 @@ async def binary_check_win(check_id: int, balance: float):
         new_balance = balance - value_loss
         new_value_loss = value_loss + win
         await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
-        await stop_by_win()
-        await stop_by_loss()
+        management = await api.get_management_status(user_id)
+        if management:
+            await stop_by_win()
+            await stop_by_loss()
     elif check_status == 'win':
         print("you win " + str(win) + "$")
         value_gain = await get_value_gain(user_id)
         new_balance = balance + value_gain
         new_value_gain = value_gain + win
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
-        await stop_by_win()
-        await stop_by_loss()
+        management = await api.get_management_status(user_id)
+        if management:
+            await stop_by_win()
+            await stop_by_loss()
 
 
 async def check_win_digital_async(check_id, balance):
