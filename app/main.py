@@ -6,6 +6,9 @@ import asyncio
 import concurrent.futures
 import multiprocessing
 from iqoption import IqOption
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor()
 
 print('Iniciando bot...')
 # Pares que serão monitorados
@@ -99,7 +102,7 @@ async def stop_by_win():
         await(api.set_status_bot(user_id, 3))
 
 
-async def digital_check_win(check_id: int, balance: float):
+def digital_check_win(check_id: int, balance: float):
     while True:
         print(f'checando digital win do id {check_id}')
         check_status, win = instance.check_win_digital_v2(check_id)
@@ -121,7 +124,7 @@ async def digital_check_win(check_id: int, balance: float):
     await stop_by_loss()
 
 
-async def binary_check_win(check_id: int, balance: float):
+def binary_check_win(check_id: int, balance: float):
     while True:
         print(f'checando binary win do id {check_id}')
         check_status, win = instance.check_win_v4(check_id)
@@ -141,6 +144,16 @@ async def binary_check_win(check_id: int, balance: float):
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
         await stop_by_win()
         await stop_by_loss()
+
+
+async def check_win_digital_async(check_id, balance):
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(executor, digital_check_win, check_id, balance)
+
+
+async def check_win_binary_async(check_id, balance):
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(executor, binary_check_win, check_id, balance)
 
 
 async def buy_trade(trade_info_id: int):
@@ -184,7 +197,7 @@ async def buy_trade(trade_info_id: int):
                                                       duration=int(time_frame))
                             check_win = []
                             balance1 = instance.get_balance()
-                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
+                            future = asyncio.create_task(check_win_digital_async(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -202,7 +215,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -213,7 +226,7 @@ async def buy_trade(trade_info_id: int):
                                 check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
                                 check_win = []
                                 balance2 = instance.get_balance()
-                                future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                future = asyncio.create_task(check_win_binary_async(id, balance2))
                                 check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -225,7 +238,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -237,7 +250,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -266,7 +279,7 @@ async def buy_trade(trade_info_id: int):
                                                       duration=int(time_frame))
                             check_win = []
                             balance1 = instance.get_balance()
-                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
+                            future = asyncio.create_task(check_win_digital_async(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -284,7 +297,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -295,7 +308,7 @@ async def buy_trade(trade_info_id: int):
                                 check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
                                 check_win = []
                                 balance2= instance.get_balance()
-                                future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                future = asyncio.create_task(check_win_binary_async(id, balance2))
                                 check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -307,7 +320,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -319,7 +332,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -348,7 +361,7 @@ async def buy_trade(trade_info_id: int):
                                                       duration=int(time_frame))
                             check_win = []
                             balance1 = instance.get_balance()
-                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
+                            future = asyncio.create_task(check_win_digital_async(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -367,7 +380,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -378,7 +391,7 @@ async def buy_trade(trade_info_id: int):
                                 check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
                                 check_win = []
                                 balance2 = instance.get_balance()
-                                future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                future = asyncio.create_task(check_win_binary_async(id, balance2))
                                 check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -390,7 +403,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -402,7 +415,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -428,7 +441,7 @@ async def buy_trade(trade_info_id: int):
                                                       duration=int(time_frame))
                             check_win = []
                             balance1 = instance.get_balance()
-                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
+                            future = asyncio.create_task(check_win_digital_async(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -446,7 +459,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -457,7 +470,7 @@ async def buy_trade(trade_info_id: int):
                                 check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
                                 check_win = []
                                 balance2 = instance.get_balance()
-                                future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                future = asyncio.create_task(check_win_binary_async(id, balance2))
                                 check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -469,7 +482,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -481,7 +494,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -510,7 +523,7 @@ async def buy_trade(trade_info_id: int):
                                                       duration=int(time_frame))
                             check_win = []
                             balance1 = instance.get_balance()
-                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
+                            future = asyncio.create_task(check_win_digital_async(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -528,7 +541,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -539,7 +552,7 @@ async def buy_trade(trade_info_id: int):
                                 check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
                                 check_win = []
                                 balance2 = instance.get_balance()
-                                future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                future = asyncio.create_task(check_win_binary_async(id, balance2))
                                 check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -551,7 +564,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -563,7 +576,7 @@ async def buy_trade(trade_info_id: int):
                                     check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
                                     check_win = []
                                     balance2 = instance.get_balance()
-                                    future = asyncio.ensure_future(binary_check_win(id, balance2))
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
                                     check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -592,7 +605,7 @@ async def buy_trade(trade_info_id: int):
                                                       duration=int(time_frame))
                             check_win = []
                             balance1 = instance.get_balance()
-                            future = asyncio.ensure_future(digital_check_win(balance=balance1, check_id=id))
+                            future = asyncio.create_task(check_win_digital_async(balance=balance1, check_id=id))
                             check_win.append(future)
                             await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                             await(api.set_trade_associated_exited_if_buy(trade_info_id))
@@ -607,29 +620,51 @@ async def buy_trade(trade_info_id: int):
                                 if remaining2 > 90 and time_frame == 2:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=2, ACTION=action)
+                                    check_win = []
+                                    balance2 = instance.get_balance()
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             elif remaining1 > 60 and time_frame == 2:
                                 print(
                                     f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check, id = instance.buy(price=amount, ACTIVES=pair, expirations=1, ACTION=action)
+                                check_win = []
+                                balance2 = instance.get_balance()
+                                future = asyncio.create_task(check_win_binary_async(id, balance2))
+                                check_win.append(future)
                                 await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                 await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                await asyncio.gather(*check_win)
                             if remaining3 < 210 and time_frame == 3:
                                 if remaining3 > 150 and time_frame == 3:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame,
+                                                             ACTION=action)
+                                    check_win = []
+                                    balance2 = instance.get_balance()
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
                             if remaining5 < 330 and time_frame == 5:
                                 if remaining5 > 270 and time_frame == 5:
                                     print(
                                         f'Comprando Binário {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                                    instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                                    check, id = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame,
+                                                             ACTION=action)
+                                    check_win = []
+                                    balance2 = instance.get_balance()
+                                    future = asyncio.create_task(check_win_binary_async(id, balance2))
+                                    check_win.append(future)
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
+                                    await asyncio.gather(*check_win)
 
 
     # if pair not in monitored_pairs:
