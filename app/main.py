@@ -110,66 +110,64 @@ async def get_value_loss(user_id):
     return await api.get_management_values(user_id)['value_loss']
 
 
-def digital_check_win(check_id: int, balance: float):
+async def digital_check_win(check_id: int, balance: float):
     while True:
         print(f'checando digital win do id {check_id}')
-        check_status, win = instance.check_win_digital_v2(check_id)
+        check_status, win = await instance.check_win_digital_v2(check_id)
         print(f'digital {check_id}, status: {check_status}, win: {win}')
         time.sleep(1)
         if check_status:
             break
     if win < 0:
         print("you loss " + str(win) + "$")
-        value_loss = asyncio.run(get_value_loss(user_id))
+        value_loss = await get_value_loss(user_id)
         new_balance = balance - value_loss
         new_value_loss = value_loss + win
-        asyncio.run(api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss))
-        asyncio.run(stop_by_win())
-        asyncio.run(stop_by_loss())
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
+        await stop_by_win()
+        await stop_by_loss()
     else:
         print("you win " + str(win) + "$")
-        value_gain = asyncio.run(get_value_gain(user_id))
+        value_gain = await get_value_gain(user_id)
         new_balance = balance + value_gain
         new_value_gain = value_gain + win
-        asyncio.run(api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain))
-        asyncio.run(stop_by_win())
-        asyncio.run(stop_by_loss())
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
+        await stop_by_win()
+        await stop_by_loss()
 
 
-def binary_check_win(check_id: int, balance: float):
+async def binary_check_win(check_id: int, balance: float):
     while True:
         print(f'checando binary win do id {check_id}')
-        check_status, win = instance.check_win_v4(check_id)
+        check_status, win = await instance.check_win_v4(check_id)
         print(f'binary {check_id}, status: {check_status}, win: {win}')
         time.sleep(1)
         if check_status:
             break
     if check_status == 'loose':
         print("you loss " + str(win) + "$")
-        value_loss = asyncio.run(get_value_loss(user_id))
+        value_loss = await get_value_loss(user_id)
         new_balance = balance - value_loss
         new_value_loss = value_loss + win
-        asyncio.run(api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss))
-        asyncio.run(stop_by_win())
-        asyncio.run(stop_by_loss())
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
+        await stop_by_win()
+        await stop_by_loss()
     elif check_status == 'win':
         print("you win " + str(win) + "$")
-        value_gain = asyncio.run(get_value_gain(user_id))
+        value_gain = await get_value_gain(user_id)
         new_balance = balance + value_gain
         new_value_gain = value_gain + win
-        asyncio.run(api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain))
-        asyncio.run(stop_by_win())
-        asyncio.run(stop_by_loss())
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
+        await stop_by_win()
+        await stop_by_loss()
 
 
 async def check_win_digital_async(check_id, balance):
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(executor, digital_check_win, check_id, balance)
+    await digital_check_win(check_id, balance)
 
 
 async def check_win_binary_async(check_id, balance):
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(executor, binary_check_win, check_id, balance)
+    await binary_check_win(check_id, balance)
 
 
 async def buy_trade(trade_info_id: int):
