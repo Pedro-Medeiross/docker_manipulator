@@ -413,7 +413,7 @@ async def stop_by_win(user_id: int):
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.get(f'https://bot.investingbrazil.online/management/stop/win/{user_id}', headers=headers) as response:
+            async with session.get(f'https://bot.investingbrazil.online/stop_win/{user_id}', headers=headers) as response:
                 r = await response.json()
                 return r
         except:
@@ -436,7 +436,7 @@ async def stop_by_loss(user_id: int):
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.get(f'https://bot.investingbrazil.online/management/stop/loss/{user_id}', headers=headers) as response:
+            async with session.get(f'https://bot.investingbrazil.online/stop_loss/{user_id}', headers=headers) as response:
                 r = await response.json()
                 return r
         except:
