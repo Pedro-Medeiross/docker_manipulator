@@ -129,6 +129,7 @@ async def digital_check_win(check_id: int, balance: float):
         await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=abs(new_value_loss))
         management = await api.get_management_status(user_id)
         if management:
+            print('Checando se é para ser parado')
             await stop_by_win()
             await stop_by_loss()
     else:
@@ -139,6 +140,7 @@ async def digital_check_win(check_id: int, balance: float):
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=abs(new_value_gain))
         management = await api.get_management_status(user_id)
         if management:
+            print('Checando se é para ser parado')
             await stop_by_win()
             await stop_by_loss()
 
