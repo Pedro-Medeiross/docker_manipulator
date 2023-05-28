@@ -89,7 +89,7 @@ async def stop_by_loss():
     value_loss = management_values['value_loss']
     if value_loss >= stop_loss:
         print('Parando bot por perda...')
-        await api.set_status_bot(user_id, 4)
+        await api.stop_by_loss(user_id)
 
 
 async def stop_by_win():
@@ -99,7 +99,7 @@ async def stop_by_win():
     value_gain = management_values['value_gain']
     if value_gain >= stop_win:
         print('Parando bot por ganho...')
-        await api.set_status_bot(user_id, 3)
+        await api.stop_by_win(user_id)
 
 
 
