@@ -80,7 +80,7 @@ async def start_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(ge
         if container.name == f'bot_{user_id}':
             if container.status == 'running' and status_bot == 1:
                 return {'message': 'App ja iniciado!'}
-            if container.status == 'exited' and status_bot in [0, 2, 3]:
+            if container.status == 'exited' and status_bot == 0 or container.status == 'exited' and status_bot == 2 or container.status == 'exited' and status_bot == 3:
                 await api.set_status_bot(user_id, 1)
                 container.start()
                 return {'message': 'App iniciado!'}
@@ -104,7 +104,7 @@ async def stop_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(get
     """
     # Verifica se o bot já está parado.
     status_bot = await api.get_status_bot(user_id)
-    if status_bot in [0, 2, 3]:
+    if status_bot == 0:
         return {'message': 'App ja parado!'}
     # Procura pelo contêiner do cluster e o para.
     containers = client.containers.list(all=True)
