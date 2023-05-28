@@ -30,9 +30,9 @@ print('Conectado à API...')
 asyncio.run(api.reset_management_values(user_id))
 print('Valores de gerenciamento resetados...')
 
-balance = instance.get_balance()
-print('Saldo: ', balance)
-asyncio.run(api.set_balance(user_id, balance))
+start_balance = instance.get_balance()
+print('Saldo: ', start_balance)
+asyncio.run(api.set_balance(user_id, start_balance))
 print('Saldo atualizado...')
 
 # Status do bot
@@ -87,7 +87,9 @@ async def stop_by_loss():
     management_values = await api.get_management_values(user_id)
     stop_loss = management_values['stop_loss']
     value_loss = management_values['value_loss']
-    if value_loss >= stop_loss:
+    value_gain = management_values['value_gain']
+    lucro = value_gain - value_loss
+    if lucro >= stop_loss:
         print('Parando bot por perda...')
         await api.stop_by_loss(user_id)
 
@@ -97,7 +99,9 @@ async def stop_by_win():
     management_values = await api.get_management_values(user_id)
     stop_win = management_values['stop_win']
     value_gain = management_values['value_gain']
-    if value_gain >= stop_win:
+    value_loss = management_values['value_loss']
+    lucro = value_gain - value_loss
+    if lucro >= stop_win:
         print('Parando bot por ganho...')
         await api.stop_by_win(user_id)
 
@@ -126,7 +130,7 @@ async def digital_check_win(check_id: int, balance: float):
         value_loss = await get_value_loss(user_id)
         new_balance = balance - value_loss
         new_value_loss = value_loss + win
-        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=abs(new_value_loss))
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
         management = await api.get_management_status(user_id)
         if management:
             print('Checando se é para ser parado')
@@ -137,7 +141,7 @@ async def digital_check_win(check_id: int, balance: float):
         value_gain = await get_value_gain(user_id)
         new_balance = balance + value_gain
         new_value_gain = value_gain + win
-        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=abs(new_value_gain))
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
         management = await api.get_management_status(user_id)
         if management:
             print('Checando se é para ser parado')
@@ -158,7 +162,7 @@ async def binary_check_win(check_id: int, balance: float):
         value_loss = await get_value_loss(user_id)
         new_balance = balance - value_loss
         new_value_loss = value_loss + win
-        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=abs(new_value_loss))
+        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
         management = await api.get_management_status(user_id)
         if management:
             await stop_by_win()
@@ -168,7 +172,7 @@ async def binary_check_win(check_id: int, balance: float):
         value_gain = await get_value_gain(user_id)
         new_balance = balance + value_gain
         new_value_gain = value_gain + win
-        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=abs(new_value_gain))
+        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
         management = await api.get_management_status(user_id)
         if management:
             await stop_by_win()
