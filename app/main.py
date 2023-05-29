@@ -100,7 +100,7 @@ async def stop_by_win():
     stop_win = management_values['stop_win']
     value_gain = management_values['value_gain']
     value_loss = management_values['value_loss']
-    lucro = value_gain - value_loss
+    lucro = value_gain - abs(value_loss)
     if lucro >= stop_win:
         print('Parando bot por ganho...')
         await api.stop_by_win(user_id)
@@ -134,8 +134,8 @@ async def digital_check_win(check_id: int, balance: float):
         management = await api.get_management_status(user_id)
         if management:
             print('Checando se é para ser parado')
-            await stop_by_win()
             await stop_by_loss()
+            await stop_by_win()
     else:
         print("you win " + str(win) + "$")
         value_gain = await get_value_gain(user_id)
@@ -145,8 +145,8 @@ async def digital_check_win(check_id: int, balance: float):
         management = await api.get_management_status(user_id)
         if management:
             print('Checando se é para ser parado')
-            await stop_by_win()
             await stop_by_loss()
+            await stop_by_win()
 
 
 async def binary_check_win(check_id: int, balance: float):
