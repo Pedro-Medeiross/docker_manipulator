@@ -89,6 +89,7 @@ async def stop_by_loss():
     value_loss = management_values['value_loss']
     value_gain = management_values['value_gain']
     lucro = value_gain - value_loss
+    print(f'loss {lucro}")
     if lucro < 0:
         if lucro <= stop_loss:
             print('Parando bot por perda...')
@@ -102,6 +103,7 @@ async def stop_by_win():
     value_gain = management_values['value_gain']
     value_loss = management_values['value_loss']
     lucro = value_gain - abs(value_loss)
+    print(f'gain {lucro}')
     if lucro > 0:
         if lucro >= stop_win:
             print('Parando bot por ganho...')
