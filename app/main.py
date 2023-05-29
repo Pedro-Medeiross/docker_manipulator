@@ -88,7 +88,7 @@ async def stop_by_loss():
     stop_loss = management_values['stop_loss']
     value_loss = management_values['value_loss']
     value_gain = management_values['value_gain']
-    lucro = value_gain - value_loss
+    lucro = value_gain - abs(value_loss)
     print(f'loss {lucro}')
     if lucro < 0:
         print('lucro menor que 0')
