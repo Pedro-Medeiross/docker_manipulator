@@ -22,6 +22,7 @@ class IqOption:
 
         # Realizando a conexão
         self.iq_api.connect()
+        print(self.iq_api)
 
     # Função para obter o saldo da conta
     def balance(self):
