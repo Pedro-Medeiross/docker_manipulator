@@ -111,7 +111,7 @@ async def stop_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(get
     for container in containers:
         if container.name == f'bot_{user_id}':
             await api.set_status_bot(user_id, 0)
-            container.stop()
+            container.kill()
             return {'message': 'App Parado'}
     return {'message': 'Erro ao parar o App'}
 
@@ -175,7 +175,7 @@ async def stop_loss(user_id: int, credentials: HTTPBasicCredentials = Depends(ge
     for container in containers:
         if container.name == f'bot_{user_id}':
             await api.set_status_bot(user_id, 3)
-            container.stop()
+            container.kill()
             return {'message': 'App Parado por stop loss!'}
     return {'message': 'Erro ao parar o App'}
 
@@ -200,7 +200,7 @@ async def stop_win(user_id: int, credentials: HTTPBasicCredentials = Depends(get
     for container in containers:
         if container.name == f'bot_{user_id}':
             await api.set_status_bot(user_id, 2)
-            container.stop()
+            container.kill()
             return {'message': 'App Parado por stop win!'}
     return {'message': 'Erro ao parar o App'}
 
