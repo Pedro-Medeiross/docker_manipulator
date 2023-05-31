@@ -67,9 +67,6 @@ async def handle_win_checks():
             print('Sem Wins para verificar')
             await asyncio.sleep(1)  # Intervalo mais longo quando não há tarefas a serem verificadas
 
-asyncio.create_task(handle_win_checks())
-
-
 async def update_monitored_pairs(user_id: int):
     print('Atualizando pares monitorados...')
     # Obtém os pares de moedas disponíveis para negociação
@@ -689,6 +686,7 @@ async def buy_trade(trade_info_id: int):
 
 async def main():
     print('Iniciando negociação...')
+    asyncio.create_task(handle_win_checks())
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
     print('Negociações agendadas: ', trade_info_ids)
     buy_tasks = []
