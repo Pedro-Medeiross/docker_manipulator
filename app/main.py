@@ -715,25 +715,15 @@ async def buy_trade(trade_info_id: int):
 
 async def main():
     print('Iniciando negociação...')
-    trade_info_ids = await api.get_trade_user_info_scheduled(user_id)
+    trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
     print('Negociações agendadas: ', trade_info_ids)
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        print(f'Iniciando {len(trade_info_ids)} negociações...')
-
-        # Prepare a list to hold the Future objects
-        future_tasks = []
-        for trade_info_id in trade_info_ids:
-            # Schedule the function to be executed and return a Future object
-            future = loop.run_in_executor(executor, buy_trade, trade_info_id)
-            future_tasks.append(future)
-
-        print(f'Iniciando {len(trade_info_ids)} negociações...')
-
-        # Here we use asyncio.gather to return a future aggregating results from the given future objects
-        await asyncio.gather(*future_tasks)
-        print('Negociações finalizadas')
-
+    buy_tasks = []
+    for trade_info_id in trade_info_ids:
+        task = asyncio.ensure_future(buy_trade(trade_info_id))
+        buy_tasks.append(task)
+    print(f'Iniciando {len(trade_info_ids)} negociações...')
+    await asyncio.gather(*buy_tasks)
+    print('Negociações finalizadas')
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
@@ -742,3 +732,4 @@ while True:
     print('Iniciando loop...')
     loop.run_until_complete(update_monitored_pairs(user_id))
     loop.run_until_complete(main())
+
