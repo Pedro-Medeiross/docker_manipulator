@@ -67,6 +67,8 @@ async def handle_win_checks():
             print('Sem Wins para verificar')
             await asyncio.sleep(1)  # Intervalo mais longo quando não há tarefas a serem verificadas
 
+asyncio.create_task(handle_win_checks())
+
 
 async def update_monitored_pairs(user_id: int):
     print('Atualizando pares monitorados...')
