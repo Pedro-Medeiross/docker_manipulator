@@ -89,11 +89,12 @@ async def stop_by_loss():
     value_loss = management_values['value_loss']
     value_gain = management_values['value_gain']
     lucro = value_gain - abs(value_loss)
+    loss_value = stop_loss * -1
     print(f'loss {lucro}')
     if lucro < 0:
         print('lucro menor que 0')
-        if lucro <= stop_loss:
-            print(f'{lucro} <= {stop_loss}')
+        if lucro <= loss_value:
+            print(f'{lucro} <= {loss_value}')
             print('Parando bot por perda...')
             await api.stop_by_loss(user_id)
 
