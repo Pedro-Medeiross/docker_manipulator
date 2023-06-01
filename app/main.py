@@ -684,7 +684,6 @@ async def buy_trade(trade_info_id: int):
 
 async def main():
     print('Iniciando negociação...')
-    asyncio.create_task(handle_win_checks())
     trade_info_ids = await(api.get_trade_user_info_scheduled(user_id))
     print('Negociações agendadas: ', trade_info_ids)
     buy_tasks = []
@@ -696,6 +695,9 @@ async def main():
     print('Negociações finalizadas')
 
 
+async def check_win():
+    asyncio.create_task(handle_win_checks())
+
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
@@ -703,3 +705,4 @@ while True:
     print('Iniciando loop...')
     loop.run_until_complete(update_monitored_pairs(user_id))
     loop.run_until_complete(main())
+    loop.run_until_complete(check_win())
