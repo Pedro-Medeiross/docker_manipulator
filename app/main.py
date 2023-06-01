@@ -380,7 +380,7 @@ async def buy_trade(trade_info_id: int):
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
             elif actual_candle < past_candle:
                 print(f'vela vermelha: {actual_candle} < {past_candle}')
-                num1 = (float(price) / 100000) * 3.25
+                num1 = (float(price) / 100000) * 3
                 zone2 = float(price)
                 zone1 = zone2 - num1
                 if zone1 <= float(actual_candle) <= zone2:
@@ -529,7 +529,7 @@ async def buy_trade(trade_info_id: int):
                                     await(api.set_trade_associated_exited_if_buy(trade_info_id))
             if actual_candle > past_candle:
                 print(f'vela verde: {actual_candle} > {past_candle}')
-                num1 = (float(price) / 100000) * 4
+                num1 = (float(price) / 100000) * 3
                 zone1 = float(price)
                 zone2 = zone1 + num1
                 if zone1 <= float(actual_candle) <= zone2:
