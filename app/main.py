@@ -150,6 +150,9 @@ async def digital_check_win(check_id: int, balance: float):
         new_value_loss = value_loss + win
         await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
         management = await api.get_management_status(user_id)
+        rc = check_win_ids.pop(check_id)
+        rcb = check_win_ids_balance.pop(check_id)
+        print(f'removido {rc} {rcb}')
         if management:
             print('Checando se é para ser parado')
             await stop_by_loss()
@@ -161,6 +164,9 @@ async def digital_check_win(check_id: int, balance: float):
         new_value_gain = value_gain + win
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
         management = await api.get_management_status(user_id)
+        rc = check_win_ids.pop(check_id)
+        rcb = check_win_ids_balance.pop(check_id)
+        print(f'removido {rc} {rcb}')
         if management:
             print('Checando se é para ser parado')
             await stop_by_loss()
@@ -178,6 +184,9 @@ async def binary_check_win(check_id: int, balance: float):
         new_value_loss = value_loss + win
         await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
         management = await api.get_management_status(user_id)
+        rc = check_win_ids.pop(check_id)
+        rcb = check_win_ids_balance.pop(check_id)
+        print(f'removido {rc} {rcb}')
         if management:
             await stop_by_loss()
             await stop_by_win()
@@ -188,6 +197,9 @@ async def binary_check_win(check_id: int, balance: float):
         new_value_gain = value_gain + win
         await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
         management = await api.get_management_status(user_id)
+        rc = check_win_ids.pop(check_id)
+        rcb = check_win_ids_balance.pop(check_id)
+        print(f'removido {rc} {rcb}')
         if management:
             await stop_by_loss()
             await stop_by_win()
