@@ -55,18 +55,15 @@ check_win_ids_balance = {}
 
 
 async def handle_win_checks():
-    while True:
-        for ids in check_win_ids:
-            if check_win_ids[ids] == 'binary':
-                balance = check_win_ids_balance[ids]
-                await binary_check_win(check_id=ids, balance=balance)
-            elif check_win_ids[ids] == 'digital':
-                balance = check_win_ids_balance[ids]
-                await digital_check_win(check_id=ids, balance=balance)
-            await asyncio.sleep(0.1)  # Intervalo entre as verificações
-        else:
-            print('Sem Wins para verificar')
-            await asyncio.sleep(1)  # Intervalo mais longo quando não há tarefas a serem verificadas
+    print('checando win')
+    for ids in check_win_ids:
+        if check_win_ids[ids] == 'binary':
+            balance = check_win_ids_balance[ids]
+            await binary_check_win(check_id=ids, balance=balance)
+        elif check_win_ids[ids] == 'digital':
+            balance = check_win_ids_balance[ids]
+            await digital_check_win(check_id=ids, balance=balance)
+        await asyncio.sleep(0.1)  # Intervalo entre as verificações
 
 async def update_monitored_pairs(user_id: int):
     print('Atualizando pares monitorados...')
@@ -683,7 +680,8 @@ async def main():
 
 
 async def check_win():
-    asyncio.create_task(handle_win_checks())
+    if check_win_ids:
+        asyncio.create_task(handle_win_checks())
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
