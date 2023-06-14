@@ -65,6 +65,7 @@ async def handle_win_checks():
             await digital_check_win(check_id=ids, balance=balance)
         await asyncio.sleep(0.1)  # Intervalo entre as verificações
 
+
 async def update_monitored_pairs(user_id: int):
     print('Atualizando pares monitorados...')
     # Obtém os pares de moedas disponíveis para negociação
@@ -92,7 +93,7 @@ async def start_candle_stream(pairs: str):
 async def get_candles(pair: str):
     print('Obtendo velas para o par: ', pair)
     horario = time.time()
-    candles = instance.get_candles(pair, 5, 2, horario)
+    candles = instance.get_candles(pair, 1, 2, horario)
     return candles
 
 
