@@ -143,13 +143,13 @@ async def status_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(g
     for container in containers:
         if container.name == f'bot_{user_id}':
             if container.status == 'exited' and status_bot == 0:
-                return {'status': 'Parado!'}
+                return {'status': 'Parado'}
             elif container.status == 'running' and status_bot == 1:
-                return {'status': 'Rodando!'}
+                return {'status': 'Rodando'}
             elif container.status == 'exited' and status_bot == 2:
-                return {'status': 'Parado por stop win!'}
+                return {'status': 'Parado por stop win'}
             elif container.status == 'exited' and status_bot == 3:
-                return {'status': 'Parado por stop loss!'}
+                return {'status': 'Parado por stop loss'}
     return {'status': 'App não encontrado'}
 
 
