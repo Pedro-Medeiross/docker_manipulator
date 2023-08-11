@@ -5,7 +5,7 @@ import api
 import asyncio
 import concurrent.futures
 import multiprocessing
-from iqoption import IqOption
+from quotex import QuotexApi
 from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor()
@@ -19,12 +19,12 @@ candles_streams = {}
 # ID do usuário
 user_id = os.getenv('USER_ID')
 # Instância da API da IQ Option
-Iq = IqOption(user_id)
+Qt = QuotexApi(user_id)
 print('Conectando à API...')
 # Conexão à API
-Iq.connect()
-Iq.set_account_type()
-instance = Iq.instance()
+Qt.connect()
+Qt.set_account_type()
+instance = Qt.instance()
 print('Conectado à API...')
 
 asyncio.run(api.reset_management_values(user_id))
@@ -60,10 +60,6 @@ async def handle_win_checks():
         if check_win_ids[ids] == 'binary':
             balance = check_win_ids_balance[ids]
             await binary_check_win(check_id=ids, balance=balance)
-        elif check_win_ids[ids] == 'digital':
-            balance = check_win_ids_balance[ids]
-            await digital_check_win(check_id=ids, balance=balance)
-        await asyncio.sleep(0.1)  # Intervalo entre as verificações
 
 
 async def update_monitored_pairs(user_id: int):
@@ -140,40 +136,6 @@ async def get_value_loss(user_id):
     return management_values['value_loss']
 
 
-async def digital_check_win(check_id: int, balance: float):
-    print(f'checando digital win do id {check_id}')
-    check_status, win = instance.check_win_digital_v2(check_id)
-    print(f'digital {check_id}, status: {check_status}, win: {win}')
-    if win < 0:
-        print("you loss " + str(win) + "$")
-        value_loss = await get_value_loss(user_id)
-        new_balance = balance - value_loss
-        new_value_loss = value_loss + win
-        await api.update_management_values_loss(user_id=user_id, balance=new_balance, value_loss=new_value_loss)
-        management = await api.get_management_status(user_id)
-        rc = check_win_ids.pop(check_id)
-        rcb = check_win_ids_balance.pop(check_id)
-        print(f'removido {rc} {rcb}')
-        if management:
-            print('Checando se é para ser parado')
-            await stop_by_loss()
-            await stop_by_win()
-    else:
-        print("you win " + str(win) + "$")
-        value_gain = await get_value_gain(user_id)
-        new_balance = balance + value_gain
-        new_value_gain = value_gain + win
-        await api.update_management_values_gain(user_id=user_id, balance=new_balance, value_gain=new_value_gain)
-        management = await api.get_management_status(user_id)
-        rc = check_win_ids.pop(check_id)
-        rcb = check_win_ids_balance.pop(check_id)
-        print(f'removido {rc} {rcb}')
-        if management:
-            print('Checando se é para ser parado')
-            await stop_by_loss()
-            await stop_by_win()
-
-
 async def binary_check_win(check_id: int, balance: float):
     print(f'checando binary win do id {check_id}')
     check_status, win = instance.check_win_v4(check_id)
@@ -240,17 +202,7 @@ async def buy_trade(trade_info_id: int):
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
                                     return
                     if trade_status == 2:
-                        if type == 'D':
-                            print(
-                                f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                                                  duration=int(time_frame))
-                            balance1 = instance.get_balance()
-                            check_win_ids[id] = 'digital'
-                            check_win_ids_balance[id] = balance1
-                            await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
-                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
-                        elif type == 'B':
+                        if type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
                             remaining3 = instance.get_remaning(3)
@@ -315,18 +267,7 @@ async def buy_trade(trade_info_id: int):
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
                                     return
                     if trade_status == 2:
-                        if type == 'D':
-                            print(
-                                f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                                                  duration=int(time_frame))
-
-                            balance1 = instance.get_balance()
-                            check_win_ids[id] = 'digital'
-                            check_win_ids_balance[id] = balance1
-                            await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
-                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
-                        elif type == 'B':
+                        if type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
                             remaining3 = instance.get_remaning(3)
@@ -392,17 +333,7 @@ async def buy_trade(trade_info_id: int):
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
                                     return
                     if trade_status == 2:
-                        if type == 'D':
-                            print(
-                                f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                                                  duration=int(time_frame))
-                            balance1 = instance.get_balance()
-                            check_win_ids[id] = 'digital'
-                            check_win_ids_balance[id] = balance1
-                            await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
-                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
-                        elif type == 'B':
+                        if type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
                             remaining3 = instance.get_remaning(3)
@@ -465,17 +396,7 @@ async def buy_trade(trade_info_id: int):
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
                                     return
                     if trade_status == 2:
-                        if type == 'D':
-                            print(
-                                f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}')
-                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                                                  duration=int(time_frame))
-                            balance1 = instance.get_balance()
-                            check_win_ids[id] = 'digital'
-                            check_win_ids_balance[id] = balance1
-                            await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
-                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
-                        elif type == 'B':
+                        if type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
                             remaining3 = instance.get_remaning(3)
@@ -541,17 +462,7 @@ async def buy_trade(trade_info_id: int):
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
                                     return
                     if trade_status == 2:
-                        if type == 'D':
-                            print(
-                                f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                                                  duration=int(time_frame))
-                            balance1 = instance.get_balance()
-                            check_win_ids[id] = 'digital'
-                            check_win_ids_balance[id] = balance1
-                            await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
-                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
-                        elif type == 'B':
+                        if type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
                             remaining3 = instance.get_remaning(3)
@@ -616,17 +527,7 @@ async def buy_trade(trade_info_id: int):
                                     await(api.set_schedule_status(trade_id=trade_info_id, status=5, user_id=user_id))
                                     return
                     if trade_status == 2:
-                        if type == 'D':
-                            print(
-                                f'Comprando Digital {pair} com valor de {price} em {time_frame} minutos, com range de {candle}, {zone1}, {zone2}')
-                            check, id = instance.buy_digital_spot(active=pair, amount=amount, action=action,
-                                                                  duration=int(time_frame))
-                            balance1 = instance.get_balance()
-                            check_win_ids[id] = 'digital'
-                            check_win_ids_balance[id] = balance1
-                            await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
-                            await(api.set_trade_associated_exited_if_buy(trade_info_id))
-                        elif type == 'B':
+                        if type == 'B':
                             remaining1 = instance.get_remaning(1)
                             remaining2 = instance.get_remaning(2)
                             remaining3 = instance.get_remaning(3)
@@ -695,6 +596,7 @@ async def main():
 async def check_win():
     if check_win_ids:
         asyncio.create_task(handle_win_checks())
+
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)

@@ -4,8 +4,8 @@ COPY app /app
 
 WORKDIR /app
 
+RUN pip install -r requirements.txt
 RUN pip install websocket-client==0.56
-RUN pip install -U https://github.com/Pedro-Medeiross/iqoptionapi/archive/refs/heads/master.zip
 RUN pip install python-dotenv
 RUN pip install aiohttp
 RUN pip install pytz
