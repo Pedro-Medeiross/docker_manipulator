@@ -1,4 +1,4 @@
-from quotexapi.quotexapi..stable_api import Quotex
+from quotexapi.stable_api import Quotex
 import api
 import base64
 import time
