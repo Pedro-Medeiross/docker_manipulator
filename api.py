@@ -18,7 +18,7 @@ async def get_status_bot(user_id: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/id/{user_id}', headers=headers, json=payload) as response:
+        async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/id/{user_id}', headers=headers) as response:
             r = await response.json()
             status = r['status']
             return status
