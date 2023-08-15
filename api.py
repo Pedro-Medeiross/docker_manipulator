@@ -15,13 +15,10 @@ async def get_status_bot(user_id: int):
     Returns:
         dict: dicionário contendo o status do bot do usuário.
     """
-    payload = {
-    "user_id": user_id
-    }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get(f'https://v1.investingbrazil.online/bot/botoptions', headers=headers, json=payload) as response:
+        async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/id/{user_id}', headers=headers, json=payload) as response:
             r = await response.json()
             status = r['status']
             return status
