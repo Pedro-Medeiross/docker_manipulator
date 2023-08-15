@@ -60,7 +60,7 @@ async def get_user_iqoption_email(user_id: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get(f'https://v1.investingbrazil.online/user/id', headers=headers, json=payload) as response:
+        async with session.get(f'https://v1.investingbrazil.online/bot/user/{user_id}', headers=headers, json=payload) as response:
             r = await response.json()
             email = r['brokerage_email']
             return email
@@ -82,7 +82,7 @@ async def get_user_iqoption_password(user_id: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get(f'https://v1.investingbrazil.online/user/id', headers=headers, json=payload) as response:
+        async with session.get(f'https://v1.investingbrazil.online/bot/user/{user_id}', headers=headers, json=payload) as response:
             r = await response.json()
             password = r['brokerage_password']
             return password
@@ -103,7 +103,7 @@ async def get_account_type(user_id: int):
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.get(f'https://v1.investingbrazil.online/user/id', headers=headers, json=payload) as response:
+        async with session.get(f'https://v1.investingbrazil.online/bot/user/{user_id}', headers=headers, json=payload) as response:
             r = await response.json()
             account_type = r['account_type']
             return account_type
