@@ -19,7 +19,7 @@ async def get_status_bot(user_id: int):
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/{user_id}',
+            async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/id/{user_id}',
                                    headers=headers) as response:
                 r = await response.json()
                 status = r['status']
@@ -38,13 +38,10 @@ async def set_status_bot(user_id: int, status: int):
         user_id (int): ID do usuário cujo status do bot deve ser atualizado.
         status (int): novo status do bot.
     """
-    payload = {
-        "status": status
-    }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
-        async with session.put(f'https://v1.investingbrazil.online/bot/botoptions/status/{user_id}', json=payload,
+        async with session.put(f'https://v1.investingbrazil.online/bot/botoptions/status/{user_id}/{status}',
                                headers=headers) as response:
             r = await response.json()
             return r
@@ -55,7 +52,7 @@ async def get_news_status(user_id: int):
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/{user_id}',
+            async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/id/{user_id}',
                                    headers=headers) as response:
                 r = await response.json()
                 news = r['news']
@@ -71,7 +68,7 @@ async def get_management_status(user_id: int):
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/{user_id}',
+            async with session.get(f'https://v1.investingbrazil.online/bot/botoptions/id/{user_id}',
                                    headers=headers) as response:
                 r = await response.json()
                 management = r['management']
@@ -100,7 +97,7 @@ async def set_schedule_status(trade_id: int, status: int, user_id: int):
         headers = {'Authorization': auth.encode()}
         try:
             async with session.put(
-                    f'https://v1.investingbrazil.online/trades/bot/trades/update/status/{trade_id}/{user_id}',
+                    f'https://v1.investingbrazil.online/bot/trades/update/status/{trade_id}/{user_id}',
                     json=data,
                     headers=headers) as response:
                 return await response.json()
@@ -144,19 +141,16 @@ async def get_trade_user_info_scheduled(user_id: int):
     Returns:
         list: lista de dicionários contendo as informações de trade do usuário.
     """
-    params = {
-        'user_id': user_id
-    }
     async with aiohttp.ClientSession() as session:
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.get(f'https://v1.investingbrazil.online/bot/trades/user/id/{user_id}', params=params,
+            async with session.get(f'https://v1.investingbrazil.online/bot/trades/user/id/{user_id}',
                                    headers=headers) as response:
                 r = await response.json()
                 all = []
                 for i in r:
-                    all.append(i['id'])
+                    all.append(i['trade_id'])
                 return all
         except:
             if response.status != 200:
@@ -202,7 +196,7 @@ async def get_user_values_by_trade_id(trade_id: int, user_id: int):
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.get(f'https://v1.investingbrazil.online/trades/schedule/{trade_id}/{user_id}',
+            async with session.get(f'https://v1.investingbrazil.online/bot/trades/status/id/{user_id}/{trade_id}',
                                    headers=headers) as response:
                 r = await response.json()
                 return r
@@ -291,7 +285,7 @@ async def set_balance(user_id: int, balance: float):
             'balance': balance
         }
         try:
-            async with session.post(f'https://v1.investingbrazil.online/management/update/values/{user_id}', data=data,
+            async with session.post(f'https://v1.investingbrazil.online/bot/management/update/values/id/{user_id}', data=data,
                                     headers=headers) as response:
                 return await response.json()
         except:
@@ -382,36 +376,12 @@ async def update_management_values_loss(user_id: int, balance: float, value_loss
         auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
         headers = {'Authorization': auth.encode()}
         try:
-            async with session.put(f'https://v1.investingbrazil.online/management/update/values/{user_id}', json=json,
+            async with session.put(f'https://v1.investingbrazil.online/bot/management/update/values/id/{user_id}', json=json,
                                    headers=headers) as response:
                 return await response.json()
         except:
             if response.status != 200:
                 new_attempt = await update_management_values_loss(user_id, balance, value_loss)
-                return new_attempt
-
-
-async def get_management_by_user_id(user_id: int):
-    """
-    Retorna os valores do usuário com o ID fornecido.
-
-    Args:
-        trade_info_id (int): ID do usuário cujos valores devem ser retornados.
-
-    Returns:
-        list: lista de dicionários contendo os valores do usuário.
-    """
-    async with aiohttp.ClientSession() as session:
-        auth = aiohttp.BasicAuth(os.getenv('API_USER'), os.getenv('API_PASS'))
-        headers = {'Authorization': auth.encode()}
-        try:
-            async with session.get(f'https://v1.investingbrazil.online/management/user/{user_id}',
-                                   headers=headers) as response:
-                r = await response.json()
-                return r
-        except:
-            if response.status != 200:
-                new_attempt = await get_management_by_user_id(user_id)
                 return new_attempt
 
 

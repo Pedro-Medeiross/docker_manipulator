@@ -1,3 +1,4 @@
+import base64
 import os
 import time
 import pytz
@@ -5,8 +6,8 @@ import api
 import asyncio
 import concurrent.futures
 import multiprocessing
-from quotex import QuotexApi
 from concurrent.futures import ThreadPoolExecutor
+from quotexapi.stable_api import Quotex
 
 executor = ThreadPoolExecutor()
 
@@ -18,18 +19,23 @@ candles_streams = {}
 
 # ID do usuário
 user_id = os.getenv('USER_ID')
+email = os.getenv('EMAIL')
+password = base64.b64decode(os.getenv('PASSWORD')).decode()
 # Instância da API da IQ Option
-Qt = QuotexApi(int(user_id))
+instance = Quotex(email, password)
+instance.connect()
 print('Conectando à API...')
 # Conexão à API
-Qt.connect()
-Qt.set_account_type()
-instance = Qt.instance()
+if not instance.check_connect():
+    instance.connect()
+instance.change_account(os.getenv('ACCOUNT_TYPE'))
 print('Conectado à API...')
 
 asyncio.run(api.reset_management_values(int(user_id)))
 print('Valores de gerenciamento resetados...')
 
+if not instance.check_connect():
+    instance.connect()
 start_balance = instance.get_balance()
 print('Saldo: ', start_balance)
 asyncio.run(api.set_balance(int(user_id), start_balance))
@@ -63,6 +69,7 @@ async def handle_win_checks():
 
 
 async def update_monitored_pairs(user_id: int):
+    instance.get_balance()
     print('Atualizando pares monitorados...')
     # Obtém os pares de moedas disponíveis para negociação
     trade_info_pairs = await(api.get_trade_info_pairs(user_id))
@@ -77,6 +84,7 @@ async def update_monitored_pairs(user_id: int):
 
 async def start_candle_stream(pairx: str):
     print('Iniciando stream de velas para o par: ', pairx)
+    instance.get_balance()
     # Inicia o stream de velas para o par
     first_par = pairx[:3].upper()
     second_par = pairx[3:].upper()
@@ -192,7 +200,9 @@ async def buy_trade(trade_info_id: int):
     if pair in monitored_pairs:
         candle = await(get_candles(pair))
         actual_candle = candle[0]['price']
+        print(f'Vela atual: {actual_candle}')
         if action == 'put':
+            print('Ação: PUT')
             if float(actual_candle) == float(price):
                 print(f'Vela igual ao preço: {candle} = {price}')
                 if news_status:
@@ -205,7 +215,9 @@ async def buy_trade(trade_info_id: int):
                                 return
                 if trade_status == 2:
                     if type == 'B':
-                        buyed = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                        print('Negociação binária')
+                        print(time_frame)
+                        buyed = instance.buy(price=amount, asset=pair, duration=time_frame, direction=action)
                         id = buyed[1]['id']
                         balance2 = instance.get_balance()
                         check_win_ids[id] = 'binary'
@@ -213,6 +225,7 @@ async def buy_trade(trade_info_id: int):
                         await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                         await(api.set_trade_associated_exited_if_buy(trade_info_id))
         elif action == 'call':
+            print('Ação: CALL')
             if float(actual_candle) == float(price):
                 print(f'Vela igual ao preço: {candle} = {price}')
                 if news_status:
@@ -225,12 +238,14 @@ async def buy_trade(trade_info_id: int):
                                 return
                 if trade_status == 2:
                     if type == 'B':
-                        buyed = instance.buy(price=amount, ACTIVES=pair, expirations=time_frame, ACTION=action)
+                        print('Negociação binária')
+                        print(time_frame)
+                        buyed = instance.buy(price=amount, asset=pair, duration=time_frame, direction=action)
                         id = buyed[1]['id']
                         balance2 = instance.get_balance()
                         check_win_ids[id] = 'binary'
                         check_win_ids_balance[id] = balance2
-                        await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
+                        await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=int(user_id)))
                         await(api.set_trade_associated_exited_if_buy(trade_info_id))
     if pair not in monitored_pairs:
         instance.stop_candles_stream(pair)
@@ -239,6 +254,7 @@ async def buy_trade(trade_info_id: int):
 
 
 async def main():
+    instance.get_balance()
     print('Iniciando negociação...')
     trade_info_ids = await(api.get_trade_user_info_scheduled(int(user_id)))
     print('Negociações agendadas: ', trade_info_ids)
@@ -259,8 +275,14 @@ async def check_win():
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
+if not instance.check_connect():
+    instance.connect()
+
 while True:
     print('Iniciando loop...')
+    if not instance.check_connect():
+        instance.connect()
+    print(instance.get_balance())
     loop.run_until_complete(update_monitored_pairs(int(user_id)))
     loop.run_until_complete(main())
     loop.run_until_complete(check_win())

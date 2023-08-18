@@ -111,6 +111,9 @@ async def stop_bot(user_id: int, credentials: HTTPBasicCredentials = Depends(get
     for container in containers:
         if container.name == f'bot_{user_id}':
             await api.set_status_bot(user_id, 0)
+            file_to_remove = "/app/session.json"
+            cmd = f"rm {file_to_remove}"
+            container.exec_run(cmd=cmd)
             container.kill()
             return {'message': 'App Parado'}
     return {'message': 'Erro ao parar o App'}
