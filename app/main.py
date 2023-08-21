@@ -58,6 +58,7 @@ candle = None
 
 check_win_ids = {}
 check_win_ids_balance = {}
+check_win_ids_profit = {}
 
 
 async def handle_win_checks():
@@ -65,7 +66,8 @@ async def handle_win_checks():
     for ids in check_win_ids:
         if check_win_ids[ids] == 'binary':
             balance = check_win_ids_balance[ids]
-            await binary_check_win(check_id=ids, balance=balance)
+            profit = instance.check_win(ids)
+            await binary_check_win(check_id=ids, balance=balance, profit=profit)
 
 
 async def update_monitored_pairs(user_id: int):
@@ -224,6 +226,7 @@ async def buy_trade(trade_info_id: int):
                         balance2 = instance.get_balance()
                         check_win_ids[id] = 'binary'
                         check_win_ids_balance[id] = balance2
+                        check_win_ids_profit[id] = profit
                         await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=user_id))
                         await(api.set_trade_associated_exited_if_buy(trade_info_id))
         elif action == 'call':
@@ -249,6 +252,7 @@ async def buy_trade(trade_info_id: int):
                         balance2 = instance.get_balance()
                         check_win_ids[id] = 'binary'
                         check_win_ids_balance[id] = balance2
+                        check_win_ids_profit[id] = profit
                         await(api.set_schedule_status(trade_id=trade_info_id, status=4, user_id=int(user_id)))
                         await(api.set_trade_associated_exited_if_buy(trade_info_id))
     if pair not in monitored_pairs:
