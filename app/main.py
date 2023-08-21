@@ -149,15 +149,15 @@ async def get_value_loss(user_id):
     return management_values['value_loss']
 
 
-async def binary_check_win(check_id: str, balance: float):
+async def binary_check_win(check_id: str, balance: float, profit: float):
     print(f'checando binary win do id {check_id}')
-    check_status, win = instance.check_win(check_id)
-    print(f'binary {check_id}, status: {check_status}, win: {win}')
+    check_status = instance.check_win(check_id)
+    print(f'binary {check_id}, status: {check_status}, win: {profit}')
     if not check_status:
-        print("you loss " + str(win) + "$")
+        print("you loss " + str(profit) + "$")
         value_loss = await get_value_loss(user_id)
         new_balance = balance - value_loss
-        new_value_loss = value_loss + win
+        new_value_loss = value_loss + profit
         await api.update_management_values_loss(user_id=int(user_id), balance=new_balance, value_loss=new_value_loss)
         management = await api.get_management_status(int(user_id))
         rc = check_win_ids.pop(check_id)
@@ -167,10 +167,10 @@ async def binary_check_win(check_id: str, balance: float):
             await stop_by_loss()
             await stop_by_win()
     elif check_status:
-        print("you win " + str(win) + "$")
+        print("you win " + str(profit) + "$")
         value_gain = await get_value_gain(user_id)
         new_balance = balance + value_gain
-        new_value_gain = value_gain + win
+        new_value_gain = value_gain + profit
         await api.update_management_values_gain(user_id=int(user_id), balance=new_balance, value_gain=new_value_gain)
         management = await api.get_management_status(int(user_id))
         rc = check_win_ids.pop(check_id)
@@ -220,6 +220,7 @@ async def buy_trade(trade_info_id: int):
                         buyed = instance.buy(price=amount, asset=pair, direction=action, duration=int(time_frame))
                         print(f'buyed {buyed}')
                         id = buyed[1]['id']
+                        profit = buyed[1]['profit']
                         balance2 = instance.get_balance()
                         check_win_ids[id] = 'binary'
                         check_win_ids_balance[id] = balance2
@@ -244,6 +245,7 @@ async def buy_trade(trade_info_id: int):
                         buyed = instance.buy(price=amount, asset=pair, direction=action, duration=int(time_frame))
                         print(f'buyed {buyed}')
                         id = buyed[1]['id']
+                        profit = buyed[1]['profit']
                         balance2 = instance.get_balance()
                         check_win_ids[id] = 'binary'
                         check_win_ids_balance[id] = balance2
