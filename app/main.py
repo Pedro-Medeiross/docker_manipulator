@@ -216,9 +216,9 @@ async def buy_trade(trade_info_id: int):
                 if trade_status == 2:
                     if type == 'B':
                         print('Negociação binária')
-                        print(time_frame)
-                        buyed = instance.buy(price=amount, asset=pair, duration=time_frame, direction=action)
-                        print(buyed)
+                        print(f'all values {time_frame} {amount} {pair} {action}')
+                        buyed = instance.buy(price=amount, asset=pair, direction=action, duration=int(time_frame))
+                        print(f'buyed {buyed}')
                         id = buyed[1]['id']
                         balance2 = instance.get_balance()
                         check_win_ids[id] = 'binary'
@@ -240,9 +240,9 @@ async def buy_trade(trade_info_id: int):
                 if trade_status == 2:
                     if type == 'B':
                         print('Negociação binária')
-                        print(time_frame)
-                        buyed = instance.buy(price=amount, asset=pair, duration=time_frame, direction=action)
-                        print(buyed)
+                        print(f'all values {time_frame} {amount} {pair} {action}')
+                        buyed = instance.buy(price=amount, asset=pair, direction=action, duration=int(time_frame))
+                        print(f'buyed {buyed}')
                         id = buyed[1]['id']
                         balance2 = instance.get_balance()
                         check_win_ids[id] = 'binary'
